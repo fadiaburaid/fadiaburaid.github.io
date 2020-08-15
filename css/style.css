@@ -8866,7 +8866,7 @@ h1, h2, h3, h4, h5,
     bottom: 0;
     content: '';
     opacity: 0;
-    background: #0075f6;
+    background: #F8F9FA;
     z-index: -1;
     -moz-transition: all 0.3s ease;
     -o-transition: all 0.3s ease;
@@ -8899,7 +8899,7 @@ h1, h2, h3, h4, h5,
         .project .text span {
           color: rgba(255, 255, 255, 0.8); } }
   .project:hover .overlay, .project:focus .overlay {
-    opacity: .9; }
+    opacity: 1; }
   .project:hover .text, .project:focus .text {
     opacity: 1; }
 
