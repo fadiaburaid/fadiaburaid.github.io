@@ -425,7 +425,7 @@
 
         <div class="row no-gutters block-9">
           <div class="col-md-6 order-md-last d-flex">
-            <form action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSduIIwURh3Tr1KoZnZVP_hccG85vHWVPWPuaAKADoCn2HKFug/formResponse"  method="POST" target="hidden_iframe" class="bg-light p-4 p-md-5 contact-form">
+            <form action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSduIIwURh3Tr1KoZnZVP_hccG85vHWVPWPuaAKADoCn2HKFug/formResponse"  method="POST" target="hidden_iframe" onsubmit="submitted()" class="bg-light p-4 p-md-5 contact-form">
               <div class="form-group">
                 <input type="text" class="form-control" name="entry.977069402" placeholder="Your Name" required>
               </div>
@@ -545,7 +545,11 @@
 		{
 		  x.currentTime = 0;
 		  x.play();     
-		}    
+		}  
+
+		function submitted() {
+		  alert("The form was submitted");
+		}		
 	</script>
 
   </body>
