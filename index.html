@@ -426,7 +426,7 @@
         <div class="row no-gutters block-9">
           <div class="col-md-6 order-md-last d-flex">
 		  <script type="text/javascript">var submitted=false;</script>
-		  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted)  {window.location='/'; alert("The form was submitted");}"></iframe>
+		  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted)  {window.location='/'; alertmsg();}"></iframe>
             <form action="https://docs.google.com/forms/u/0/d/e/1FAIpQLSduIIwURh3Tr1KoZnZVP_hccG85vHWVPWPuaAKADoCn2HKFug/formResponse"  method="POST" target="hidden_iframe" onsubmit="submitted=true;" class="bg-light p-4 p-md-5 contact-form">
               <div class="form-group">
                 <input type="text" class="form-control" name="entry.977069402" placeholder="Your Name" required>
@@ -548,7 +548,9 @@
 		  x.currentTime = 0;
 		  x.play();     
 		}  
-	
+		function alertmsg() {
+			alert("Message has been submitted");
+		}
 	</script>
 
   </body>
