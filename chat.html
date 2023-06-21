@@ -62,8 +62,8 @@
 	<script type="importmap">
 		{
 			"imports": {
-				"three": "./three.module.js",
-				"three/addons/": ./static/jsm/"
+				"three": "./build/three.module.js",
+				"three/addons/": ./jsm/"
 			}
 		}
 	</script>
@@ -162,7 +162,7 @@
 		// Face
 
 		const ktx2Loader = new KTX2Loader()
-			.setTranscoderPath( "static/basis/" )
+			.setTranscoderPath( "./basis/" )
 			.detectSupport( renderer );
 
 		let head,lefteye,righteye,teeth;
@@ -170,7 +170,7 @@
 		new GLTFLoader()
 			.setKTX2Loader( ktx2Loader )
 			.setMeshoptDecoder( MeshoptDecoder )
-			.load( "static/avatars/fadi-formal-rig.glb", ( gltf ) => {
+			.load( "./avatars/fadi-formal-rig.glb", ( gltf ) => {
 
 				const mesh = gltf.scene.children[ 0 ];
 				scene.add( mesh );
