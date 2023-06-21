@@ -63,7 +63,7 @@
 		{
 			"imports": {
 				"three": "https://unpkg.com/three@0.138.0/build/three.module.js",
-				"addons": "https://unpkg.com/browse/three@0.138.0/examples/jsm/"
+				//"three/addons/": "https://unpkg.com/browse/three@0.138.0/examples/jsm/"
 			}
 		}
 	</script>
@@ -71,11 +71,11 @@
 		import * as THREE from 'three';
 
 		//import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-		import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+		import { RoomEnvironment } from 'https://unpkg.com/browse/three@0.138.0/examples/jsm/environments/RoomEnvironment.js';
 
-		import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-		import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
-		import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+		import { GLTFLoader } from 'https://unpkg.com/browse/three@0.138.0/examples/jsm/loaders/GLTFLoader.js';
+		import { KTX2Loader } from 'https://unpkg.com/browse/three@0.138.0/examples/jsm/loaders/KTX2Loader.js';
+		import { MeshoptDecoder } from 'https://unpkg.com/browse/three@0.138.0/examples/jsm/libs/meshopt_decoder.module.js';
 
 		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
