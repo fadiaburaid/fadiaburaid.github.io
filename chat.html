@@ -287,7 +287,7 @@
         async function main() {
             const socket = io("http://45.76.206.121");
 
-            socket.on("connect",{secure: false, port:80}, async () => {
+            socket.on("connect", async () => {
                 const myvad = await vad.MicVAD.new({
                     positiveSpeechThreshold: 0.8,
                     negativeSpeechThreshold: 0.8 - 0.15,
