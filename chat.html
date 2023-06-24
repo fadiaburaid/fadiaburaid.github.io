@@ -285,14 +285,8 @@
 		let audio
 		
         async function main() {
-			const io = require("socket.io")(httpServer, {
-			  cors: {
-				origin: "http://45.76.206.121",
-				methods: ["GET", "POST"]
-			  }
-			});
 			
-            const socket = io("http://45.76.206.121");
+            const socket = io("http://45.76.206.121:5001");
 			
             socket.on("connect", async () => {
                 const myvad = await vad.MicVAD.new({
