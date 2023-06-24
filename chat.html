@@ -286,7 +286,14 @@
 		
         async function main() {
             const socket = io("http://45.76.206.121");
-
+			
+			const io = require("socket.io")(httpServer, {
+			  cors: {
+				origin: "http://45.76.206.121",
+				methods: ["GET", "POST"]
+			  }
+			});
+			
             socket.on("connect", async () => {
                 const myvad = await vad.MicVAD.new({
                     positiveSpeechThreshold: 0.8,
