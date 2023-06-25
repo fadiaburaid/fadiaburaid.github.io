@@ -171,7 +171,7 @@
 		const environment = new RoomEnvironment();
 		const pmremGenerator = new THREE.PMREMGenerator( renderer );
 		const loader = new THREE.TextureLoader();
-		scene.background = loader.load( "./images/office2.jpg]" );
+		scene.background = loader.load( "images/office2.jpg]" );
 
 		//scene.background = new THREE.Color( 0x666666 );
 		scene.environment = pmremGenerator.fromScene( environment ).texture;
