@@ -167,7 +167,7 @@
 
 		const scene = new THREE.Scene();
 		scene.scale.x = - 1;
-
+		var speed=0.01, mesh;
 		const environment = new RoomEnvironment();
 		const pmremGenerator = new THREE.PMREMGenerator( renderer );
 		const loader = new THREE.TextureLoader();
@@ -191,7 +191,7 @@
 			.setMeshoptDecoder( MeshoptDecoder )
 			.load( "./avatars/fadi-formal-rig.glb", ( gltf ) => {
 
-				const mesh = gltf.scene.children[ 0 ];
+				mesh = gltf.scene.children[ 0 ];
 				scene.add( mesh );
 				
 				mixer = new THREE.AnimationMixer( mesh );
