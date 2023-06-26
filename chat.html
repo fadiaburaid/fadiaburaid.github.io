@@ -61,6 +61,7 @@
 			  background:rgba(77,77,77,.4);
 			  font-size: 3rem;
 			  font-weight: bold;
+			  display: none;
 			}
         </style>
     </head>
@@ -222,6 +223,7 @@
 				  setTimeout(function(){
 				  activeAction=actions[ 'idle1' ];
 				  activeAction.play();
+				  btn.style.display = 'block';
 				  }, 2000);
 				};
 				walk_turn();
