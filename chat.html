@@ -320,7 +320,7 @@
 		let audio
 		
         async function main() {
-            const socket = io("https://45.76.206.121:5000");
+            const socket = io("http://45.76.206.121:5000");
 
             socket.on("connect", async () => {
                 const myvad = await vad.MicVAD.new({
