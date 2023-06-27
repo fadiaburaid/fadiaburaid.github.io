@@ -93,6 +93,8 @@
 
 		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
+		import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.3.0';	
+		
 		const blendshapesMap = {
 			// '_neutral': '',
 			'browDownLeft': 'browDownLeft',
@@ -154,6 +156,13 @@
 	    // add event listener for the button, for action "click"
 	    btn.addEventListener("click", welcome);
 		//
+		
+		const file = "tos.pcm";
+        const model = "Xenova/whisper-base.en";
+
+        var wavBuffer,content;
+
+        const pipe = await pipeline("automatic-speech-recognition", model);
 
 		const renderer = new THREE.WebGLRenderer( { canvas: avatarCanvas } );
 		renderer.setPixelRatio( window.devicePixelRatio );
@@ -317,10 +326,10 @@
 		
 		const output = document.getElementById("output");
         const status = document.getElementById("status");
-		let audio
+		var socket,audio;
 		
         async function main() {
-            const socket = io("https://45.76.206.121:5000");
+            socket = io("https://45.76.206.121:5000");
 
             socket.on("connect", async () => {
                 const myvad = await vad.MicVAD.new({
@@ -335,9 +344,8 @@
                     },
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
-                        const wavBuffer = vad.utils.encodeWAV(audio);
-                        const base64 = vad.utils.arrayBufferToBase64(wavBuffer);
-                        socket.emit("audio_data", base64);
+                        wavBuffer = new Float32Array(audio);
+						transcribe();
                     },
                 });
                 myvad.start();
@@ -373,6 +381,19 @@
 				process_visemes(data)
             });
 			
+        }
+		
+		async function transcribe() {
+            status.innerText = ""
+			content=""
+            const result = await pipe(wavBuffer, {
+                    chunk_length_s: 30,
+                    stride_length_s: 5,
+                    return_timestamps: true});
+            for(let {text, timestamp} of result.chunks)
+                content += `${text}\n`;
+            output.value = content;
+			socket.emit("transcription", content);
         }
         
 		let count,playvsms;
