@@ -345,16 +345,10 @@
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
                         wavBuffer = new Float32Array(audio);
-						transcribe();
+						await transcribe();
                     },
                 });
                 myvad.start();
-            });
-            socket.on("transcription", (data) => {
-                status.innerText = "";
-                output.value = (data)
-                    .replace(".", " ")
-                    .replace("  ", " ");
             });
 			
 			socket.on("reply", (data) => {
