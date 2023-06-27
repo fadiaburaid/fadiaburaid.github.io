@@ -93,8 +93,6 @@
 
 		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
-		import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.3.0';	
-		
 		const blendshapesMap = {
 			// '_neutral': '',
 			'browDownLeft': 'browDownLeft',
@@ -156,13 +154,6 @@
 	    // add event listener for the button, for action "click"
 	    btn.addEventListener("click", welcome);
 		//
-		
-		const file = "tos.pcm";
-        const model = "Xenova/whisper-base.en";
-
-        var wavBuffer,content;
-
-        const pipe = await pipeline("automatic-speech-recognition", model);
 
 		const renderer = new THREE.WebGLRenderer( { canvas: avatarCanvas } );
 		renderer.setPixelRatio( window.devicePixelRatio );
@@ -326,10 +317,10 @@
 		
 		const output = document.getElementById("output");
         const status = document.getElementById("status");
-		var socket,audio;
+		let audio
 		
         async function main() {
-            socket = io("https://9fa1k4-ip-59-50-32-36.tunnelmole.com");
+            const socket = io("https://9fa1k4-ip-59-50-32-36.tunnelmole.com");
 
             socket.on("connect", async () => {
                 const myvad = await vad.MicVAD.new({
@@ -344,11 +335,18 @@
                     },
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
-                        wavBuffer = new Float32Array(audio);
-						transcribe();
+                        const wavBuffer = vad.utils.encodeWAV(audio);
+                        const base64 = vad.utils.arrayBufferToBase64(wavBuffer);
+                        socket.emit("audio_data", base64);
                     },
                 });
                 myvad.start();
+            });
+            socket.on("transcription", (data) => {
+                status.innerText = "";
+                output.value = (data)
+                    .replace(".", " ")
+                    .replace("  ", " ");
             });
 			
 			socket.on("reply", (data) => {
@@ -375,19 +373,6 @@
 				process_visemes(data)
             });
 			
-        }
-		
-		async function transcribe() {
-            status.innerText = ""
-			content=""
-            const result = await pipe(wavBuffer, {
-                    chunk_length_s: 30,
-                    stride_length_s: 5,
-                    return_timestamps: true});
-            for(let {text, timestamp} of result.chunks)
-                content += `${text}\n`;
-            output.value = content;
-			socket.emit("transcription", content);
         }
         
 		let count,playvsms;
