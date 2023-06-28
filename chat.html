@@ -317,10 +317,10 @@
 		
 		const output = document.getElementById("output");
         const status = document.getElementById("status");
-		let audio
+		var socket, audio;
 		
         async function main() {
-            const socket = io("https://eszgbo-ip-59-50-32-36.tunnelmole.com");
+            socket = io("https://eszgbo-ip-59-50-32-36.tunnelmole.com");
 
             socket.on("connect", async () => {
                 const myvad = await vad.MicVAD.new({
