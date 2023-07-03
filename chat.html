@@ -328,7 +328,7 @@
         const status = document.getElementById("status");
 		var socket,audio;
 		
-		let	transcribe = async() +> {
+		let	transcribe = async() => {
             const result = await pipe(wavBuffer, {
                     chunk_length_s: 30,
                     stride_length_s: 5,
