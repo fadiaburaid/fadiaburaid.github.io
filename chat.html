@@ -344,9 +344,18 @@
                     },
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
+						content=""
                         wavBuffer = new Float32Array(audio);
-						transcribe();
+						const result = await pipe(wavBuffer, {
+								chunk_length_s: 30,
+								stride_length_s: 5,
+								return_timestamps: true});
+						for(let {text, timestamp} of result.chunks)
+							content += `${text}\n`;
+						output.value = content;
+						socket.emit("transcription", content);
                     },
+					
                 });
                 myvad.start();
             });
@@ -375,19 +384,6 @@
 				process_visemes(data)
             });
 			
-        }
-		
-		async function transcribe() {
-            status.innerText = ""
-			content=""
-            const result = await pipe(wavBuffer, {
-                    chunk_length_s: 30,
-                    stride_length_s: 5,
-                    return_timestamps: true});
-            for(let {text, timestamp} of result.chunks)
-                content += `${text}\n`;
-            output.value = content;
-			socket.emit("transcription", content);
         }
         
 		let count,playvsms;
