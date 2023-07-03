@@ -2,7 +2,7 @@ import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.3.
 const file = "tos.pcm";
 const model = "Xenova/whisper-base.en";
 
-var content="";
+var content;
 var pipe;
 
 (async () => {
@@ -10,6 +10,7 @@ var pipe;
 })()
 
 onmessage = async function(e) {
+	content=""
 	let result = await pipe(e.data, {
 			chunk_length_s: 30,
 			stride_length_s: 5,
