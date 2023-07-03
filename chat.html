@@ -321,9 +321,9 @@
         const status = document.getElementById("status");
 		var socket,audio;
 		
-		if (typeof(w) == "undefined") {
-			var w = new Worker("./jsm/worker.js");
-		}			
+		
+		var w = new Worker("./jsm/worker.js");
+				
         async function main() {
             socket = io("https://qkxlyq-ip-59-50-32-36.tunnelmole.com");
 
