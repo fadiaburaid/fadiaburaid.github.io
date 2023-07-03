@@ -92,8 +92,6 @@
 		import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-
-		import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.3.0';	
 		
 		const blendshapesMap = {
 			// '_neutral': '',
@@ -156,13 +154,7 @@
 	    // add event listener for the button, for action "click"
 	    btn.addEventListener("click", welcome);
 		//
-		
-		const file = "tos.pcm";
-        const model = "Xenova/whisper-base.en";
-
-        var wavBuffer,content;
-
-        const pipe = await pipeline("automatic-speech-recognition", model);
+        var wavBuffer,base64;
 
 		const renderer = new THREE.WebGLRenderer( { canvas: avatarCanvas } );
 		renderer.setPixelRatio( window.devicePixelRatio );
@@ -344,7 +336,8 @@
                     },
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
-                        wavBuffer = new Float32Array(audio);
+						wavBuffer = vad.utils.encodeWAV(audio);
+                        base64 = vad.utils.arrayBufferToBase64(wavBuffer);
 						transcribe();
                     },
                 });
@@ -378,16 +371,7 @@
         }
 		
 		async function transcribe() {
-            status.innerText = ""
-			content=""
-            const result = await pipe(wavBuffer, {
-                    chunk_length_s: 30,
-                    stride_length_s: 5,
-                    return_timestamps: true});
-            for(let {text, timestamp} of result.chunks)
-                content += `${text}\n`;
-            output.value = content;
-			socket.emit("transcription", content);
+			socket.emit("audio_data", base64);
         }
         
 		let count,playvsms;
