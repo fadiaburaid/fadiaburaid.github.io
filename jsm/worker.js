@@ -1,4 +1,5 @@
-pipeline = require('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.3.0');
+import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.3.0/src/pipelines.js';	
+
 const file = "tos.pcm";
 const model = "Xenova/whisper-base.en";
 
