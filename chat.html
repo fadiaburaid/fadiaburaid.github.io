@@ -160,7 +160,7 @@
 		const file = "tos.pcm";
         const model = "Xenova/whisper-base.en";
 
-        var wavBuffer,content;
+        var wavBuffer;
 
         const pipe = await pipeline("automatic-speech-recognition", model);
 
@@ -327,19 +327,10 @@
 		const output = document.getElementById("output");
         const status = document.getElementById("status");
 		var socket,audio;
-				
-		async function transcribe() {
-			content="";
-            let result = await pipe(wavBuffer, {
-                    chunk_length_s: 30,
-                    stride_length_s: 5,
-                    return_timestamps: true});
-            for(let {text, timestamp} of result.chunks)
-                content += `${text}\n`;
-          
-			return content;
-        }
 		
+		if (typeof(w) == "undefined") {
+			w = new Worker("./jsm/worker.js");
+		}			
         async function main() {
             socket = io("https://qkxlyq-ip-59-50-32-36.tunnelmole.com");
 
@@ -357,10 +348,11 @@
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
                         wavBuffer = new Float32Array(audio);
-						transcribe().then(message => { 
-							output.value = message;
-							socket.emit("transcription", message);
-						});
+						w.postMessage(wavBuffer);
+						w.onmessage = function(event){
+							output.value = event.data;;
+							socket.emit("transcription", event.data;);
+						};
                     },
                 });
                 myvad.start();
