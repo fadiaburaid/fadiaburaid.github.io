@@ -329,14 +329,15 @@
 		var socket,audio;
 				
 		async function transcribe() {
+			content="";
             let result = await pipe(wavBuffer, {
                     chunk_length_s: 30,
                     stride_length_s: 5,
                     return_timestamps: true});
             for(let {text, timestamp} of result.chunks)
                 content += `${text}\n`;
-          
-			return content;
+          		output.value = content;
+				socket.emit("transcription", content);
         }
 		
         async function main() {
@@ -355,12 +356,10 @@
                     },
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
-						content="";
                         wavBuffer = new Float32Array(audio);
-						transcribe.then( message => {
-						output.value = message;
-						socket.emit("transcription", message);
-						});
+						(async () => {
+							await transcribe();
+						})()
                     },
                 });
                 myvad.start();
