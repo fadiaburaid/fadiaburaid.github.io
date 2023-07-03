@@ -358,8 +358,8 @@
 						content="";
                         wavBuffer = new Float32Array(audio);
 						transcribe.then(message =>
-						output.value = message;
-						socket.emit("transcription", message);
+						output.value = message
+						socket.emit("transcription", message)
 						);
                     },
                 });
