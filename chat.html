@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8" />
 		<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"> 
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
         <title>AI Avatar Resume</title>
 
@@ -19,6 +20,7 @@
             body {
                 font-family: sans-serif;
                 font-family: "Exo", sans-serif;
+
                 background: #000000;
                 color: white;
             }
@@ -91,6 +93,8 @@
 
 		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
+		import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.3.0';	
+		
 		const blendshapesMap = {
 			// '_neutral': '',
 			'browDownLeft': 'browDownLeft',
@@ -146,11 +150,19 @@
 			'noseSneerRight': 'noseSneerRight',
 			// '': 'tongueOut'
 		};
+		
 		// get reference to button
 	    var btn = document.getElementById("myBtn");
 	    // add event listener for the button, for action "click"
 	    btn.addEventListener("click", welcome);
 		//
+		
+		const file = "tos.pcm";
+        const model = "Xenova/whisper-base.en";
+
+        var wavBuffer,content;
+
+        const pipe = await pipeline("automatic-speech-recognition", model);
 
 		const renderer = new THREE.WebGLRenderer( { canvas: avatarCanvas } );
 		renderer.setPixelRatio( window.devicePixelRatio );
@@ -170,6 +182,7 @@
 		const pmremGenerator = new THREE.PMREMGenerator( renderer );
 		const loader = new THREE.TextureLoader();
 		scene.background = loader.load( "jsm/data/office.jpg" );
+
 		//scene.background = new THREE.Color( 0x666666 );
 		scene.environment = pmremGenerator.fromScene( environment ).texture;
 
@@ -313,7 +326,7 @@
 		
 		const output = document.getElementById("output");
         const status = document.getElementById("status");
-		var socket, audio;
+		var socket,audio;
 		
         async function main() {
             socket = io("https://qkxlyq-ip-59-50-32-36.tunnelmole.com");
@@ -331,18 +344,11 @@
                     },
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
-                        const wavBuffer = vad.utils.encodeWAV(audio);
-                        const base64 = vad.utils.arrayBufferToBase64(wavBuffer);
-                        socket.emit("audio_data", base64);
+                        wavBuffer = new Float32Array(audio);
+						transcribe();
                     },
                 });
                 myvad.start();
-            });
-            socket.on("transcription", (data) => {
-                status.innerText = "";
-                output.value = (data)
-                    .replace(".", " ")
-                    .replace("  ", " ");
             });
 			
 			socket.on("reply", (data) => {
@@ -369,6 +375,19 @@
 				process_visemes(data)
             });
 			
+        }
+		
+		async function transcribe() {
+            status.innerText = ""
+			content=""
+            const result = await pipe(wavBuffer, {
+                    chunk_length_s: 30,
+                    stride_length_s: 5,
+                    return_timestamps: true});
+            for(let {text, timestamp} of result.chunks)
+                content += `${text}\n`;
+            output.value = content;
+			socket.emit("transcription", content);
         }
         
 		let count,playvsms;
