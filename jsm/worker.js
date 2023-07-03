@@ -1,5 +1,3 @@
-<script type="module">
-import { pipeline } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.3.0';	
 
 const file = "tos.pcm";
 const model = "Xenova/whisper-base.en";
@@ -17,4 +15,3 @@ onmessage = async function(e) {
 		content += `${text}\n`;
 	postMessage(content);
 };
-</script>
