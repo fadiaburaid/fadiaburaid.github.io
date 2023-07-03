@@ -353,7 +353,7 @@
                         console.log("Speech start detected");
                         status.innerText = "Listening...";
                     },
-                    onSpeechEnd: (audio) => {
+                    onSpeechEnd: async(audio) => {
                         status.innerText = "Processing...";
 						content="";
                         wavBuffer = new Float32Array(audio);
