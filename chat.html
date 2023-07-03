@@ -154,13 +154,8 @@
 	    // add event listener for the button, for action "click"
 	    btn.addEventListener("click", welcome);
 		//
-		
-		const file = "tos.pcm";
-        const model = "Xenova/whisper-base.en";
-
+	
         var wavBuffer;
-
-        const pipe = await pipeline("automatic-speech-recognition", model);
 
 		const renderer = new THREE.WebGLRenderer( { canvas: avatarCanvas } );
 		renderer.setPixelRatio( window.devicePixelRatio );
