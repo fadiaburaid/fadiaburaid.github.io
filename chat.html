@@ -357,10 +357,10 @@
                         status.innerText = "Processing...";
 						content="";
                         wavBuffer = new Float32Array(audio);
-						transcribe.then(message =>
-						output.value = message
-						socket.emit("transcription", message)
-						);
+						transcribe.then( message => {
+						output.value = message;
+						socket.emit("transcription", message);
+						});
                     },
                 });
                 myvad.start();
