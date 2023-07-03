@@ -350,7 +350,7 @@
                         wavBuffer = new Float32Array(audio);
 						w.postMessage(wavBuffer);
 						w.onmessage = function(event){
-							output.value = event.data;;
+							output.value = event.data;
 							socket.emit("transcription", event.data;);
 						};
                     },
