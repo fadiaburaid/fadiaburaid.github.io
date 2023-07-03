@@ -328,6 +328,16 @@
         const status = document.getElementById("status");
 		var socket,audio;
 		
+		let transcribe = new Promise((resolve, reject) => {
+			const result = await pipe(wavBuffer, {
+                    chunk_length_s: 30,
+                    stride_length_s: 5,
+                    return_timestamps: true});
+            for(let {text, timestamp} of result.chunks)
+                content += `${text}\n`;
+				resolve(content)
+		})
+		
         async function main() {
             socket = io("https://qkxlyq-ip-59-50-32-36.tunnelmole.com");
 
@@ -346,21 +356,11 @@
                         status.innerText = "Processing...";
 						content=""
                         wavBuffer = new Float32Array(audio);
-						const transcribe = new Promise((resolve, reject) => {
-						  	const result = pipe(wavBuffer, {
-								chunk_length_s: 30,
-								stride_length_s: 5,
-								return_timestamps: true});
-							for(let {text, timestamp} of result.chunks)
-								content += `${text}\n`;
-							resolve(content)
-						})
-						transcribe.then( message =>{
-							output.value = message;
-						    socket.emit("transcription", message);
+						transcribe.then(message => {
+						    output.value = message;
+							socket.emit("transcription", message);
 						})
                     },
-					
                 });
                 myvad.start();
             });
@@ -390,6 +390,23 @@
             });
 			
         }
+		
+		
+
+		
+		/*
+		async function transcribe() {
+			content=""
+            const result = await pipe(wavBuffer, {
+                    chunk_length_s: 30,
+                    stride_length_s: 5,
+                    return_timestamps: true});
+            for(let {text, timestamp} of result.chunks)
+                content += `${text}\n`;
+            output.value = content;
+			socket.emit("transcription", content);
+        }
+		*/
         
 		let count,playvsms;
 		let ocls_phnms=[];
