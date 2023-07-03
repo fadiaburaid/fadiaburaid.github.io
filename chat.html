@@ -351,7 +351,7 @@
 						w.postMessage(wavBuffer);
 						w.onmessage = function(event){
 							output.value = event.data;
-							socket.emit("transcription", event.data;);
+							socket.emit("transcription", event.data);
 						};
                     },
                 });
