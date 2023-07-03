@@ -3,9 +3,10 @@ const file = "tos.pcm";
 const model = "Xenova/whisper-base.en";
 
 var content="";
+var pipe;
 
 (async () => {
-	const pipe = await pipeline("automatic-speech-recognition", model);
+	pipe = await pipeline("automatic-speech-recognition", model);
 })()
 
 onmessage = async function(e) {
