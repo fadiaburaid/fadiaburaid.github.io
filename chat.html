@@ -335,8 +335,8 @@
                     return_timestamps: true});
             for(let {text, timestamp} of result.chunks)
                 content += `${text}\n`;
-            output.value = content;
-			socket.emit("transcription", content);
+          
+			return content;
         }
 		
         async function main() {
@@ -353,11 +353,14 @@
                         console.log("Speech start detected");
                         status.innerText = "Listening...";
                     },
-                    onSpeechEnd: async(audio) => {
+                    onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
 						content="";
                         wavBuffer = new Float32Array(audio);
-						await transcribe();
+						transcribe.then(message =>
+						output.value = message;
+						socket.emit("transcription", message);
+						);
                     },
                 });
                 myvad.start();
