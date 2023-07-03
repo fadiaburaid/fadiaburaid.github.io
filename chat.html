@@ -347,7 +347,7 @@
 						content=""
                         wavBuffer = new Float32Array(audio);
 						const transcribe = new Promise((resolve, reject) => {
-						  	const result = await pipe(wavBuffer, {
+						  	const result = pipe(wavBuffer, {
 								chunk_length_s: 30,
 								stride_length_s: 5,
 								return_timestamps: true});
