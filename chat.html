@@ -345,7 +345,7 @@
                     onSpeechEnd: (audio) => {
                         status.innerText = "Processing...";
                         wavBuffer = new Float32Array(audio);
-						await transcribe();
+						transcribe();
                     },
                 });
                 myvad.start();
