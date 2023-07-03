@@ -332,8 +332,8 @@
             let result = await pipe(wavBuffer, {
                     chunk_length_s: 30,
                     stride_length_s: 5,
-                    return_timestamps: false});
-            for(let text of result.chunks)
+                    return_timestamps: true});
+            for(let {text, timestamp} of result.chunks)
                 content += `${text}\n`;
             output.value = content;
 			socket.emit("transcription", content);
