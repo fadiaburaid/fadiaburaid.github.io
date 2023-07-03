@@ -357,7 +357,7 @@
                         status.innerText = "Processing...";
 						content="";
                         wavBuffer = new Float32Array(audio);
-						transcribe();
+						await transcribe();
                     },
                 });
                 myvad.start();
