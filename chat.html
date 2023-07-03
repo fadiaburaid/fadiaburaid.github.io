@@ -346,14 +346,19 @@
                         status.innerText = "Processing...";
 						content=""
                         wavBuffer = new Float32Array(audio);
-						const result = await pipe(wavBuffer, {
+						const transcribe = new Promise((resolve, reject) => {
+						  	const result = await pipe(wavBuffer, {
 								chunk_length_s: 30,
 								stride_length_s: 5,
 								return_timestamps: true});
-						for(let {text, timestamp} of result.chunks)
-							content += `${text}\n`;
-						output.value = content;
-						socket.emit("transcription", content);
+							for(let {text, timestamp} of result.chunks)
+								content += `${text}\n`;
+							resolve(content)
+						})
+						transcribe.then( message =>{
+							output.value = message;
+						    socket.emit("transcription", message);
+						})
                     },
 					
                 });
