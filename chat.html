@@ -372,7 +372,6 @@
 			
 			socket.on("visemes", (data) => {
 				process_visemes(data);
-				myvad.start();
             });
 			
         }
@@ -407,6 +406,7 @@
 					teeth.morphTargetInfluences[ i ] = 0;
 				}
 				ocls_phnms=[];
+				myvad.start();
 			}
 		}
 			
