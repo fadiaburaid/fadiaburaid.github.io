@@ -318,7 +318,7 @@
 		
 		const output = document.getElementById("output");
         const status = document.getElementById("status");
-		var socket,audio;
+		var myvad,socket,audio;
 		
 		var w = new Worker("./jsm/worker.js", { type: "module" });
 				
@@ -326,7 +326,7 @@
             socket = io("https://r6lha6-ip-59-50-32-36.tunnelmole.com");
 
             socket.on("connect", async () => {
-                const myvad = await vad.MicVAD.new({
+                    myvad = await vad.MicVAD.new({
                     positiveSpeechThreshold: 0.8,
                     negativeSpeechThreshold: 0.8 - 0.15,
                     minSpeechFrames: 2,
