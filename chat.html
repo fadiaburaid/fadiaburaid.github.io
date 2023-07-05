@@ -320,12 +320,8 @@
 		var socket,myvad,audio,wavBuffer;
 		
         async function main() {
-			socket = io({
-			  extraHeaders: {
-				 "ngrok-skip-browser-warning": "69420"
-			  }
-			});
-            //socket = io("https://d79a-59-50-32-36.ngrok-free.app");
+
+            socket = io();
 
             socket.on("connect", async () => {
                 myvad = await vad.MicVAD.new({
