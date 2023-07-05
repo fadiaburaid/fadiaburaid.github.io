@@ -163,8 +163,8 @@
 		const camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 1, 100 );
 		camera.position.set( -0.6, 1.5, 2);	
 		//camera.position.z = 5;
-		let mixer,clips,actions, activeAction, previousAction;
-		let clock = new THREE.Clock();
+		var mixer,clips,actions, activeAction, previousAction;
+		var clock = new THREE.Clock();
 
 		const scene = new THREE.Scene();
 		scene.scale.x = - 1;
@@ -185,7 +185,7 @@
 			.setTranscoderPath( "./basis/" )
 			.detectSupport( renderer );
 
-		let head,lefteye,righteye,teeth;
+		var head,lefteye,righteye,teeth;
 		
 		new GLTFLoader()
 			.setKTX2Loader( ktx2Loader )
@@ -200,7 +200,7 @@
 				
 				
 				actions = {};
-				for ( let i = 0; i < clips.length; i ++ ) {
+				for ( var i = 0; i < clips.length; i ++ ) {
 
 					const clip = clips[ i ];
 					const action = mixer.clipAction( clip );
@@ -254,7 +254,7 @@
 				const values1 = [ 0,0.5,0,0];
 				const values2 = [ 0,0,0,0.5];
 				
-				let i=0;
+				var i=0;
 				var blink = function(){
 				  //close the eyes
 				  head.morphTargetInfluences[ 65 ] = 1;
@@ -367,12 +367,12 @@
 			
         }
         
-		let count,playvsms;
-		let ocls_phnms=[];
+		var count,playvsms;
+		var ocls_phnms=[];
 		function process_visemes(jali_vsms) {
-        let splitLines = jali_vsms.split(/\r?\n/);
-		for (let r = 0; r < splitLines.length; r++) {
-			let jali_phnms=splitLines[r].split(",").map(function(item){
+        var splitLines = jali_vsms.split(/\r?\n/);
+		for (var r = 0; r < splitLines.length; r++) {
+			var jali_phnms=splitLines[r].split(",").map(function(item){
 			  return item.trim();
 			});;
 			ocls_phnms[r]=[0,Number(jali_phnms[19]),Number(jali_phnms[20]),Number(jali_phnms[15]),0,Number(jali_phnms[18]),(Number(jali_phnms[16])+Number(jali_phnms[14]))/2,Number(jali_phnms[13]),Number(jali_phnms[17]),Number(jali_phnms[12]),(Number(jali_phnms[2])+Number(jali_phnms[3]))/2,(Number(jali_phnms[4])+Number(jali_phnms[5])+Number(jali_phnms[10])+Number(jali_phnms[11]))/4,Number(jali_phnms[6]),Number(jali_phnms[7]),(Number(jali_phnms[8])+Number(jali_phnms[9]))/2];
@@ -384,7 +384,7 @@
 		}
 		
 		function play_visemes(){
-			for (let i = 0; i < 15; i++) {
+			for (var i = 0; i < 15; i++) {
 				head.morphTargetInfluences[ i ] = ocls_phnms[count][i];
 				teeth.morphTargetInfluences[ i ] = ocls_phnms[count][i];
 			}
@@ -392,7 +392,7 @@
 			if (count == ocls_phnms.length-1){
 				clearInterval(playvsms);
 				fadeToAction( "idle1", 1 );
-				for (let i = 0; i < 15; i++) {
+				for (var i = 0; i < 15; i++) {
 					head.morphTargetInfluences[ i ] = 0;
 					teeth.morphTargetInfluences[ i ] = 0;
 				}
