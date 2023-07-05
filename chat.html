@@ -92,7 +92,7 @@
 		import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 		import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
-		
+
 		const blendshapesMap = {
 			// '_neutral': '',
 			'browDownLeft': 'browDownLeft',
@@ -154,8 +154,6 @@
 	    // add event listener for the button, for action "click"
 	    btn.addEventListener("click", welcome);
 		//
-	
-        var wavBuffer;
 
 		const renderer = new THREE.WebGLRenderer( { canvas: avatarCanvas } );
 		renderer.setPixelRatio( window.devicePixelRatio );
@@ -316,17 +314,16 @@
 
 		} );
 		
+		
 		const output = document.getElementById("output");
         const status = document.getElementById("status");
-		var myvad,socket,audio;
+		var myvad,socket, audio;
 		
-		var w = new Worker("./jsm/worker.js", { type: "module" });
-				
         async function main() {
-            socket = io("https://r6lha6-ip-59-50-32-36.tunnelmole.com");
+            socket = io("https://yyspun-ip-59-50-32-36.tunnelmole.com");
 
             socket.on("connect", async () => {
-                    myvad = await vad.MicVAD.new({
+                myvad = await vad.MicVAD.new({
                     positiveSpeechThreshold: 0.8,
                     negativeSpeechThreshold: 0.8 - 0.15,
                     minSpeechFrames: 2,
@@ -339,15 +336,18 @@
                     onSpeechEnd: (audio) => {
 						myvad.pause();
                         status.innerText = "Processing...";
-                        wavBuffer = new Float32Array(audio);
-						w.postMessage(wavBuffer);
-						w.onmessage = function(event){
-							output.value = event.data;
-							socket.emit("transcription", event.data);
-						};
+                        const wavBuffer = vad.utils.encodeWAV(audio);
+                        const base64 = vad.utils.arrayBufferToBase64(wavBuffer);
+                        socket.emit("audio_data", base64);
                     },
                 });
                 myvad.start();
+            });
+            socket.on("transcription", (data) => {
+                status.innerText = "";
+                output.value = (data)
+                    .replace(".", " ")
+                    .replace("  ", " ");
             });
 			
 			socket.on("reply", (data) => {
@@ -371,7 +371,7 @@
             });
 			
 			socket.on("visemes", (data) => {
-				process_visemes(data);
+				process_visemes(data)
             });
 			
         }
