@@ -317,7 +317,7 @@
 		
 		const output = document.getElementById("output");
         const status = document.getElementById("status");
-		var myvad,socket, audio;
+		var socket,myvad,audio,wavBuffer;
 		
         async function main() {
             socket = io("https://yyspun-ip-59-50-32-36.tunnelmole.com");
@@ -336,7 +336,7 @@
                     onSpeechEnd: (audio) => {
 						myvad.pause();
                         status.innerText = "Processing...";
-                        const wavBuffer = vad.utils.encodeWAV(audio);
+                        wavBuffer = vad.utils.encodeWAV(audio);
                         const base64 = vad.utils.arrayBufferToBase64(wavBuffer);
                         socket.emit("audio_data", base64);
                     },
