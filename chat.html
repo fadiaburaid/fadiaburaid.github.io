@@ -320,7 +320,8 @@
 		var socket,myvad,audio,wavBuffer;
 		
         async function main() {
-            socket = io("https://edec-59-50-32-36.ngrok-free.app");
+  
+            socket = io("https://d79a-59-50-32-36.ngrok-free.app");
 
             socket.on("connect", async () => {
                 myvad = await vad.MicVAD.new({
@@ -404,6 +405,15 @@
 		}
 			
 		function welcome(){
+		fetch("https://d79a-59-50-32-36.ngrok-free.app", {
+			method: "get",
+			headers: new Headers({
+				"ngrok-skip-browser-warning": "69420",
+			  }),
+			})
+			  .then((response) => response.json())
+			  .then((data) => console.log(data))
+			  .catch((err) => console.log(err));
 		btn.style.display = 'none';
 		audio = new Audio("./jsm/data/speech.wav");	
 		audio.load();
