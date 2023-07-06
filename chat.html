@@ -147,13 +147,13 @@
     </head>
     <body>
         <h1>AI Avatar Resume</h1>
+		<section id="loading-screen">
+			<div id="loader"></div>
+		</section>
 		<button type="button" id="myBtn">Click To Begin</button>
 		<canvas id="avatarCanvas"></canvas>
         <p id="status"></p>
         <textarea id="output"></textarea>
-		<section id="loading-screen">
-			<div id="loader"></div>
-		</section>
     </body>
 
 	<script type="importmap">
@@ -279,9 +279,8 @@
 			loadingScreen.addEventListener( 'transitionend', onTransitionEnd );
 			
 		} );
-		const loading = new GLTFLoader( loadingManager );
 		
-		loading.setKTX2Loader( ktx2Loader )
+		const GLTFLoader( loadingManager ).setKTX2Loader( ktx2Loader )
 			.setMeshoptDecoder( MeshoptDecoder )
 			.load( "./avatars/fadi-formal-rig.glb", ( gltf ) => {
 
