@@ -280,7 +280,7 @@
 			
 		} );
 		
-		const GLTFLoader( loadingManager ).setKTX2Loader( ktx2Loader )
+		new GLTFLoader( loadingManager ).setKTX2Loader( ktx2Loader )
 			.setMeshoptDecoder( MeshoptDecoder )
 			.load( "./avatars/fadi-formal-rig.glb", ( gltf ) => {
 
