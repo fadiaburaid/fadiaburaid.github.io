@@ -1,0 +1,207 @@
+{
+  "packages": [
+    {
+      "name": "sophgo",
+      "maintainer": "Sophgo",
+      "websiteURL": "https://github.com/kubuds/arduino-sophgo",
+      "email": "global.support@sophgo.com",
+      "help": {
+        "online": "https://community.milkv.io/"
+      },
+      "platforms": [
+        {
+          "name": "SG200X",
+          "architecture": "SG200X",
+          "version": "0.2.4",
+          "category": "SG200X",
+          "archiveFileName": "arduino-sophgo.zip",
+          "help": {
+            "online": "https://community.milkv.io/"
+          },
+          "boards": [
+            {
+              "name": "Milkv Duo Dev Board"
+            }
+          ],
+          "url": "https://github.com/milkv-duo/duo-arduino/releases/download/v0.2.4/arduino-sophgo.zip",
+          "checksum": "SHA-256:bad91934904f12c5ded154241c6929b53abebe51933ab88a813cf2c03b311d7b",
+          "size": "1283298",
+          "toolsDependencies": [
+            {
+              "packager": "sophgo",
+              "name": "xpack-riscv-none-elf-gcc",
+              "version": "13.2.0-2"
+            },
+            {
+              "packager": "sophgo",
+              "name": "burntool_py",
+              "version": "0.3"
+            }
+          ]
+        },
+        {
+          "name": "SG200X",
+          "architecture": "SG200X",
+          "version": "0.2.3",
+          "category": "SG200X",
+          "url": "https://github.com/milkv-duo/duo-arduino/releases/download/V1.0.0/arduino-sophgo.zip",
+          "archiveFileName": "arduino-sophgo.zip",
+          "checksum": "SHA-256:225ff6e17133ac1c8b71a3a198343f6d8576c0cfab211129bddb6f0f42f917ec",
+          "size": "628119",
+          "help": {
+            "online": "https://community.milkv.io/"
+          },
+          "boards": [
+            {
+              "name": "Milkv Duo Dev Board"
+            }
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "sophgo",
+              "name": "xpack-riscv-none-elf-gcc",
+              "version": "13.2.0-2"
+            },
+            {
+              "packager": "sophgo",
+              "name": "burntool_py",
+              "version": "0.2"
+            }
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "name": "burntool_py",
+          "version": "0.3",
+          "systems": [
+            {
+              "host": "i686-mingw32",
+              "archiveFileName": "burntool.zip",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/v0.2.4/burntool.zip",
+              "checksum": "SHA-256:0001073b91396f7be0618fe956e2fe0140099b9865198f7dc75a544fbb25fcdb",
+              "size": "2729"
+            },
+            {
+              "host": "x86_64-mingw32",
+              "archiveFileName": "burntool.zip",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/v0.2.4/burntool.zip",
+              "checksum": "SHA-256:0001073b91396f7be0618fe956e2fe0140099b9865198f7dc75a544fbb25fcdb",
+              "size": "2729"
+            },
+            {
+              "host": "x86_64-linux-gnu",
+              "archiveFileName": "burntool.tar.gz",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/v0.2.4/burntool.tar.gz",
+              "checksum": "SHA-256:1f1f15ca9dde928cda1a612febbd7086819597fb3cd0577aef6dc787f1c1a6ff",
+              "size": "2368"
+            },
+            {
+              "host": "x86_64-apple-darwin",
+              "archiveFileName": "burntool.tar.gz",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/v0.2.4/burntool.tar.gz",
+              "checksum": "SHA-256:1f1f15ca9dde928cda1a612febbd7086819597fb3cd0577aef6dc787f1c1a6ff",
+              "size": "2368"
+            },
+            {
+              "host": "arm64-apple-darwin",
+              "archiveFileName": "burntool.tar.gz",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/v0.2.4/burntool.tar.gz",
+              "checksum": "SHA-256:1f1f15ca9dde928cda1a612febbd7086819597fb3cd0577aef6dc787f1c1a6ff",
+              "size": "2368"
+            },
+            {
+              "host": "aarch64-linux-gnu",
+              "archiveFileName": "burntool.tar.gz",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/v0.2.4/burntool.tar.gz",
+              "checksum": "SHA-256:1f1f15ca9dde928cda1a612febbd7086819597fb3cd0577aef6dc787f1c1a6ff",
+              "size": "2368"
+            }
+          ]
+        },
+        {
+          "name": "xpack-riscv-none-elf-gcc",
+          "version": "13.2.0-2",
+          "systems": [
+            {
+              "host": "x86_64-mingw32",
+              "archiveFileName": "xpack-riscv-none-elf-gcc-13.2.0-2-win32-x64.zip",
+              "url": "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-win32-x64.zip",
+              "checksum": "SHA-256:28ce9f0cfa09f8d4c638a59fb4e17e3f61c80c47e46f11b2ba505a2a3db602f8",
+              "size": "575804723"
+            },
+            {
+              "host": "x86_64-linux-gnu",
+              "archiveFileName": "xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz",
+              "url": "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-linux-x64.tar.gz",
+              "checksum": "SHA-256:52545afb900200fbf65fe05f7ce7090b8a42c64091f4f5d43cae6bb68ea2434a",
+              "size": "514514778"
+            },
+            {
+              "host": "x86_64-apple-darwin",
+              "archiveFileName": "xpack-riscv-none-elf-gcc-13.2.0-2-darwin-x64.tar.gz",
+              "url": "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-darwin-x64.tar.gz",
+              "checksum": "SHA-256:72e65bcad6360eb059096a0fb77f3e3e6c618b1281b89648056c95d1b2749466",
+              "size": "506786123"
+            },
+            {
+              "host": "arm64-apple-darwin",
+              "archiveFileName": "xpack-riscv-none-elf-gcc-13.2.0-2-darwin-arm64.tar.gz",
+              "url": "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-darwin-arm64.tar.gz",
+              "checksum": "SHA-256:dfe3123e5e5093b165eaaf18401b802cbb8697f5ec9b0f5cfd99c45e848fd8a7",
+              "size": "503063487"
+            },
+            {
+              "host": "aarch64-linux-gnu",
+              "archiveFileName": "xpack-riscv-none-elf-gcc-13.2.0-2-linux-arm64.tar.gz",
+              "url": "https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v13.2.0-2/xpack-riscv-none-elf-gcc-13.2.0-2-linux-arm64.tar.gz",
+              "checksum": "SHA-256:1c981c611a38dfe5af902089aed570d4dd501eb4ed88d801043e59ab9a62a86a",
+              "size": "511508420"
+            }
+          ]
+        },
+        {
+          "name": "burntool_py",
+          "version": "0.2",
+          "systems": [
+            {
+              "host": "x86_64-mingw32",
+              "archiveFileName": "burntool.zip",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/V1.0.0/burntool.zip",
+              "checksum": "SHA-256:b7f6e3e0edfb692bf04cc76eb1b49c495a3f673c251cafb4163b8555c893cd73",
+              "size": "2729"
+            },
+            {
+              "host": "x86_64-linux-gnu",
+              "archiveFileName": "burntool.tar.gz",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/V1.0.0/burntool.tar.gz",
+              "checksum": "SHA-256:6c491c197f96bce85d9f0e8b5ae7476e3882d77f9b733da36246deb2ca2e69cc",
+              "size": "2365"
+            },
+            {
+              "host": "x86_64-apple-darwin",
+              "archiveFileName": "burntool.tar.gz",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/V1.0.0/burntool.tar.gz",
+              "checksum": "SHA-256:6c491c197f96bce85d9f0e8b5ae7476e3882d77f9b733da36246deb2ca2e69cc",
+              "size": "2365"
+            },
+            {
+              "host": "arm64-apple-darwin",
+              "archiveFileName": "burntool.tar.gz",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/V1.0.0/burntool.tar.gz",
+              "checksum": "SHA-256:6c491c197f96bce85d9f0e8b5ae7476e3882d77f9b733da36246deb2ca2e69cc",
+              "size": "2365"
+            },
+            {
+              "host": "aarch64-linux-gnu",
+              "archiveFileName": "burntool.tar.gz",
+              "url": "https://github.com/milkv-duo/duo-arduino/releases/download/V1.0.0/burntool.tar.gz",
+              "checksum": "SHA-256:6c491c197f96bce85d9f0e8b5ae7476e3882d77f9b733da36246deb2ca2e69cc",
+              "size": "2365"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
