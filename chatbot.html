@@ -466,7 +466,7 @@
         fd.set("sdp", connection.localDescription.sdp);
         fd.set("session", JSON.stringify(newSession));
 
-        const baseUrl = "https://api.allorigins.win/raw?url=https://api.openai.com/v1/realtime/calls";
+        const baseUrl = "https://api.openai.com/v1/realtime/calls";
         const apikey = el.apikey.value;
         const response = await fetch(`${baseUrl}?model=${model}`, {
             method: "POST",
