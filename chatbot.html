@@ -281,8 +281,8 @@
         await head.showAvatar( avatar, updateInfo.bind(null,"head") );
 
         el.info.style.display = 'none';
-        el.label.disabled = true;
-        el.apikey.disabled = true;
+        el.label.disabled = false;
+        el.apikey.disabled = false;
       } catch (error) {
         console.log(error);
         info.error = error.message?.slice() || "Unknown error.";
@@ -510,7 +510,7 @@
 
         el.info.style.display = 'none';
         el.label.style.display = "none";
-        el.apikey.style.display = false;
+        el.apikey.style.display = "none";
         el.connection.disabled = false;
         el.connection.value  = "Disconnect";
 
@@ -581,7 +581,7 @@
       }
 
       el.label.style.display = "inline-block";
-      el.apikey.style.display = false;
+      el.apikey.style.display = "inline-block";
       el.connection.disabled = false;
       el.connection.value  = "Connect";
       isClosing = false;
@@ -640,21 +640,11 @@
     <div id="avatar"></div>
     <div id="info"></div>
   </div>
-<div id="controls">
-  <label id="label" for="apikey" disabled></label>
-  
-  <input 
-    id="apikey" 
-    name="apikey" 
-    type="text" 
-    value="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" 
-    style="display: none;" 
-    placeholder="API Key" 
-    disabled
-  />
-  
-  <input id="connection" type="button" value="Connect" />
-</div>
+  <div id="controls">
+    <label id="label" for="apikey" disabled>OpenAI:</label>
+    <input id="apikey" name="apikey" type="text" placeholder="API Key" disabled/>
+    <input id="connection" type="button" value="Connect" disabled/>
+  </div>
 </body>
 
 </html>
