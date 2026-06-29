@@ -465,10 +465,10 @@
         fd.set("session", JSON.stringify(newSession));
 
       
-        const response = await fetch("/api/chat", { // Calls your backend instead
+        const response = await fetch("/api/chat", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json" // We send JSON to our own server
             },
             body: JSON.stringify({
                 sdp: connection.localDescription.sdp,
