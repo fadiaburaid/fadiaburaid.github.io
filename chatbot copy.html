@@ -464,29 +464,29 @@
         fd.set("sdp", connection.localDescription.sdp);
         fd.set("session", JSON.stringify(newSession));
 
-      
         const response = await fetch("/api/chat", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json" // We send JSON to our own server
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({
                 sdp: connection.localDescription.sdp,
                 session: newSession
             })
         });
+
+        // 2. Check for errors from your backend
         if (!response.ok) {
-            console.error("Failed to fetch SDP answer:", await response.text());
+            const errorText = await response.text();
+            console.error("Backend error:", errorText);
+            throw new Error("Failed to get SDP answer from backend");
         }
 
-        // Extract call ID from the Location header - could be useful for debugging
-        const location = response.headers.get("Location");
-        const callId = location?.split("/").pop();
-        console.log("call created:", callId);
+        // 3. Define the variable ONCE using 'let' or 'const'
+        const answerSdp = await response.text(); 
+        console.log("SDP answer received:", answerSdp);
 
-        const answerSdp = await response.text();
-        console.log("SDP answer:", answerSdp);
-
+        // 4. Proceed with setting the description
         await connection.setRemoteDescription({type: "answer", sdp: answerSdp});
 
         // Wait for connection to be established before proceeding
