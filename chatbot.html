@@ -151,15 +151,6 @@
           }
         }
       }
-      {
-  type: "function",
-  name: "search_cv",
-  description: "Search Fadi's professional CV and background history",
-  parameters: {
-    type: "object",
-    properties: { "query": { type: "string", description: "The user's question" } }
-  }
-}
     ];
 
     // Other globals
@@ -375,32 +366,20 @@
         break;
 
       case "response.function_call_arguments.done":
-      const name = message.name;
-      const jsonArgs = message.arguments;
-      let args = jsonArgs ? JSON.parse(jsonArgs) : null;
+        const name = message.name;
+        const jsonArgs = message.arguments;
+        let args = jsonArgs ? JSON.parse(jsonArgs) : null;
 
-      // 1. Check for your existing functions
-      if (name === "set_mood" && args?.mood) {
-        head.setMood(args.mood);
-      } else if (name === "make_hand_gesture" && args?.gesture) {
-        head.playGesture(args.gesture);
-      } else if (name === "make_facial_expression" && args?.emoji) {
-        head.speakEmoji(args.emoji);
-      } 
-      // 2. Add the new Search CV function
-      else if (name === "search_cv" && args?.query) {
-        fetch("/api/search", {
-            method: "POST",
-            body: JSON.stringify({ query: args.query })
-        })
-        .then(res => res.text())
-        .then(result => {
-            // Send the search results back to the AI avatar
-            sendSystemMessage(`Here is the information from your CV: ${result}`);
-        })
-        .catch(err => console.error("Search failed:", err));
-      }
-      break;
+        // Function calling
+        if (name === "set_mood" && args?.mood) {
+          head.setMood(args.mood);
+        } else if (name === "make_hand_gesture" && args?.gesture) {
+          head.playGesture(args.gesture);
+        } else if (name === "make_facial_expression" && args?.emoji) {
+          head.speakEmoji(args.emoji);
+        }
+
+        break;
 
       case "output_audio_buffer.started":
         head.isSpeaking = true;
