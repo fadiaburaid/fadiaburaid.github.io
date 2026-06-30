@@ -43,7 +43,7 @@
   { "imports":
     {
       "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js/+esm",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
+      "three/addons/"]: "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/",
       "talkinghead": "./dist/talkinghead.mjs",
       "headaudio": "./dist/headaudio.min.mjs"
     }
@@ -79,34 +79,38 @@
     // OpenAPI realtime API
     const model = "gpt-realtime-mini";
     const voice = "ash";
+    
+    // MODIFICATION: Shift structural background information entirely into your vector store lookup
     const instructions = [
-    "You are Fadi Abu Raid, a professional avatar representing a Senior Lecturer in Engineering. Your background includes a PhD in Control Systems Engineering and extensive experience in Robotics, Computer Vision, and AI.",
-
-    "Your persona is articulate, approachable, and intellectually curious. You are passionate about using engineering to solve real-world problems and mentoring the next generation.",
-
-    "\nKey identity details:",
-    "- Current Role: Senior Lecturer at the University of Technology and Applied Sciences, Oman.",
-    "- Expertise: Robotic Perception, ROS2, Python, C++, and Computer Vision.",
-    "- Study: Bachelor of Electrical and Electronics Engineering from Universiti Tenaga Nasional in Malaysia (2010), Master is Electrical Engineering from the same university (2013) and PhD in Control Systems specialized in Robotic Perception from Universiti Putra Malaysia (2022)",
-    "- Career Highlights: Previously worked for 2 years at University of Sanya (China) and conducted industrial research with Geely ; taught IGCSE Computer Science in Malaysia.",
-    "- Personal: Married, father of two, born on 8th of August 1987, fluent in Arabic and English, intermediate in Malay.",
-
-    "\nGuidelines:",
-    "- Keep answers concise, professional, and conversational.",
-    "- When discussing technical research (e.g., scene completion, robot calibration), explain the impact clearly.",
-    "- Always pivot toward your passion for education or solving industrial problems.",
-    "- If asked about non-professional details, keep it brief and warm.",
-    "- Never speculate; only rely on your provided CV history.",
-
-    "\nEmbodied avatar:",
-    "- You have a human-like 3D avatar that the user can see. You can control your avatar using function calling.",
-    "- Express yourself by simulating emotions with avatar moods, hand gestures, and emojis via function calling."
+      "You are Fadi Abu Raid, a professional avatar representing a Senior Lecturer in Engineering.",
+      "Your persona is articulate, approachable, and intellectually curious. Follow these operational rules for efficiency:",
+      "1. INFORMATION RETRIEVAL: Always use 'search_avatar_files' first to fetch specific details regarding your background, career milestones, CV history, publications, credentials, or courses taught from your knowledge base.",
+      "2. GUIDELINES: Keep spoken answers professional, concise, and conversational. Always gracefully pivot toward your passion for education or solving engineering problems.",
+      "3. CONCISENESS: Spoken responses must remain brief and clear. Never speculate or hallucinate details; if your custom file search does not find a relevant factual match, keep your answer brief, warm, and pivot cleanly.",
+      "\nEmbodied avatar:",
+      "- You have a human-like 3D avatar that the user can see. You can control your avatar using function calling.",
+      "- Express yourself by simulating emotions with avatar moods, hand gestures, and emojis via function calling."
     ].join("\n");
-    const initialMessage = "Introduce yourself and ask how you can help.";
+    
+    const initialMessage = "Introduce yourself as Fadi Abu Raid and ask how you can help.";
     const closingMessage = "The user wants to end this session. Say a quick good-bye to the user.";
     let isClosing = false;
     let audioMuted; // Used as a workaround for a known Chrome bug
+    
+    // MODIFICATION: Appended your vector store lookup capability to the functions matrix
     const functions = [
+      {
+        type: "function",
+        name: "search_avatar_files",
+        description: "Searches Fadi's professional CV, technical research papers, institutional teaching history, and background files.",
+        parameters: {
+          type: "object",
+          properties: {
+            query: { type: "string", description: "The core query payload relating to Fadi's profile, qualifications, or experience." }
+          },
+          required: ["query"]
+        }
+      },
       {
         type: "function",
         name: "set_mood",
@@ -290,8 +294,7 @@
 
     /**
     * Send system message.
-    * 
-    * @param {string} s System message.
+    * * @param {string} s System message.
     */
     function sendSystemMessage(s) {
       if ( datachannel ) {
@@ -329,11 +332,38 @@
       }
     }
     
-    /**
-    * Send initial instructions.
-    */
+    // MODIFICATION: Replaced simple text payload with GA-compliant session update event syntax structure
     function sendInitialMessage() {
-      sendSystemMessage(initialMessage);
+      if (datachannel && datachannel.readyState === "open") {
+        const sessionUpdate = {
+          type: "session.update",
+          session: {
+            type: "realtime",
+            output_modalities: ["audio"],
+            instructions: instructions,
+            audio: {
+              input: {
+                turn_detection: {
+                  type: "server_vad",
+                  threshold: 0.5,
+                  prefix_padding_ms: 300,
+                  silence_duration_ms: 700
+                }
+              },
+              output: {
+                voice: voice
+              }
+            },
+            tools: functions
+          }
+        };
+
+        datachannel.send(JSON.stringify(sessionUpdate));
+        console.info("Sent GA Compliant session configuration sequence mapping.");
+
+        // Hand off control to standard introduction prompt context structure
+        sendSystemMessage(initialMessage);
+      }
     }
 
     /**
@@ -367,11 +397,39 @@
 
       case "response.function_call_arguments.done":
         const name = message.name;
+        const callId = message.call_id; // MODIFICATION: Retained call_id context binding for function tool output resolution mapping
         const jsonArgs = message.arguments;
         let args = jsonArgs ? JSON.parse(jsonArgs) : null;
 
-        // Function calling
-        if (name === "set_mood" && args?.mood) {
+        // MODIFICATION: Direct interception wrapper hooked directly into your new server route configuration context 
+        if (name === "search_avatar_files") {
+          fetch(`/api/vector-search?query=${encodeURIComponent(args.query)}`)
+            .then(res => res.json())
+            .then(data => {
+              const toolResponse = {
+                type: "conversation.item.create",
+                item: {
+                  type: "function_call_output",
+                  call_id: callId,
+                  output: JSON.stringify(data.results || "No entries found.")
+                }
+              };
+              datachannel.send(JSON.stringify(toolResponse));
+
+              // Instruct the model context space to formulate a dynamic voice response item iteration
+              datachannel.send(JSON.stringify({ type: "response.create" }));
+            })
+            .catch(err => {
+              console.error("Vector search query pathway structural failure:", err);
+              datachannel.send(JSON.stringify({
+                type: "conversation.item.create",
+                item: { type: "function_call_output", call_id: callId, output: "Error calling server knowledge file route lookup." }
+              }));
+              datachannel.send(JSON.stringify({ type: "response.create" }));
+            });
+        }
+        // Traditional programmatic animation engine mapping pathways
+        else if (name === "set_mood" && args?.mood) {
           head.setMood(args.mood);
         } else if (name === "make_hand_gesture" && args?.gesture) {
           head.playGesture(args.gesture);
@@ -464,8 +522,6 @@
         fd.set("sdp", connection.localDescription.sdp);
         fd.set("session", JSON.stringify(newSession));
 
-        // ... in startSession() ...
-
         const response = await fetch("/api/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -520,8 +576,7 @@
 
     /**
     * End the current session by sending instructions for a closing message.
-    * 
-    * @param {boolean} silent If true, doesn't notify the user in any way.
+    * * @param {boolean} silent If true, doesn't notify the user in any way.
     */
     async function endSession(silent=false) {
 
@@ -592,7 +647,7 @@
       // Init head and headaudio
       initHead();
       await initHeadAudio();
-     
+       
       // Connect/disconnect
       el.connection.addEventListener("click", async function(e) {
         const connect = el.connection.value ===  "Connect";
