@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TwinGrid Inspect — Damage Labelling Platform (Mock)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --bg:#0a101c; --panel:#101828; --panel2:#152034; --line:#22304a; --line2:#2d3e5e;
+  --text:#e6ecf5; --muted:#8b9ab3; --dim:#5c6b85;
+  --amber:#f5a524; --cyan:#38bdf8; --green:#34d399;
+  --p1:#ef4444; --p2:#f97316; --p3:#eab308; --p4:#60a5fa;
+  --mono:'IBM Plex Mono',ui-monospace,monospace; --sans:'IBM Plex Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;overflow-x:hidden}
+button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
+button:disabled{cursor:not-allowed}
+
+/* ---------- Header ---------- */
+header{height:64px;display:flex;align-items:center;gap:24px;padding:0 20px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#0e1626,#0a101c)}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.brand .logo{width:30px;height:30px}
+.brand b{font-size:16px;letter-spacing:.2px}
+.brand small{display:block;color:var(--muted);font-size:11px;font-family:var(--mono)}
+.pipe{display:flex;align-items:center;gap:0;flex:1;justify-content:center;min-width:0}
+.pipe .st{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:20px;font-size:12px;color:var(--muted);white-space:nowrap;position:relative}
+.pipe .st i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.pipe .st.now{background:rgba(245,165,36,.12);color:var(--amber);border:1px solid rgba(245,165,36,.35)}
+.pipe .st.now i{background:var(--amber);box-shadow:0 0 10px var(--amber);animation:blink 1.2s infinite}
+.pipe .st.next i{background:var(--dim);box-shadow:none}
+.pipe .ar{width:26px;height:2px;background:linear-gradient(90deg,var(--line2),var(--line2));position:relative;overflow:hidden}
+.pipe .ar::after{content:"";position:absolute;inset:0;width:10px;background:var(--cyan);animation:flow 1.6s linear infinite}
+@keyframes flow{from{transform:translateX(-10px)}to{transform:translateX(26px)}}
+@keyframes blink{50%{opacity:.35}}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.btn-ghost{border:1px solid var(--line2);padding:7px 12px;border-radius:8px;font-size:12px;color:var(--muted);transition:.2s}
+.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
+.mock-tag{font-family:var(--mono);font-size:10px;color:var(--amber);border:1px dashed rgba(245,165,36,.5);padding:3px 7px;border-radius:5px}
+
+/* ---------- Layout ---------- */
+main{display:grid;grid-template-columns:280px minmax(0,1fr) 350px;gap:14px;padding:14px;height:calc(100vh - 64px);min-height:680px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
+.ph h2{font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ph .cnt{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.col{display:flex;flex-direction:column;gap:14px;min-height:0}
+
+/* queue */
+.mission{padding:12px 14px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.6}
+.mission b{color:var(--text);font-weight:500}
+.prog{height:6px;border-radius:4px;background:var(--panel2);margin-top:8px;overflow:hidden}
+.prog div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--green));transition:width .6s}
+.queue{overflow:auto;flex:1}
+.qi{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .2s;align-items:center}
+.qi:hover{background:var(--panel2)}
+.qi.active{background:linear-gradient(90deg,rgba(56,189,248,.14),transparent);box-shadow:inset 3px 0 0 var(--cyan)}
+.qi .thumb{width:46px;height:34px;border-radius:5px;overflow:hidden;flex:none;border:1px solid var(--line2)}
+.qi .thumb svg{width:100%;height:100%;display:block}
+.qi .meta{flex:1;min-width:0}
+.qi .t1{font-size:12.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qi .t2{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-top:2px}
+.chip{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:4px;white-space:nowrap;font-weight:500}
+.chip.pend{color:var(--cyan);background:rgba(56,189,248,.1)}
+.chip.no{color:var(--muted);background:rgba(139,154,179,.12)}
+.chip.P1{color:#fff;background:var(--p1)} .chip.P2{color:#fff;background:var(--p2)}
+.chip.P3{color:#111;background:var(--p3)} .chip.P4{color:#0b1220;background:var(--p4)}
+
+/* priority list */
+.plist{overflow:auto;flex:1;padding:6px 0}
+.pl-empty{padding:18px 14px;color:var(--dim);font-size:12px;line-height:1.5}
+.pli{display:grid;grid-template-columns:22px 34px 1fr;gap:8px;align-items:center;padding:8px 14px;cursor:pointer;animation:slidein .45s ease}
+.pli:hover{background:var(--panel2)}
+.pli .rk{font-family:var(--mono);color:var(--dim);font-size:12px}
+.pli .ti{font-size:12px} .pli .ti small{display:block;color:var(--dim);font-family:var(--mono);font-size:10.5px}
+@keyframes slidein{from{opacity:0;transform:translateX(-12px)}}
+
+/* ---------- Viewer ---------- */
+.vh{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.vh .title{flex:1;min-width:0}
+.vh .title b{font-size:15px;font-weight:600}
+.vh .title small{display:block;color:var(--muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabs{display:flex;background:var(--panel2);border:1px solid var(--line2);border-radius:9px;padding:3px}
+.tabs button{padding:7px 12px;border-radius:7px;font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;transition:.2s;white-space:nowrap}
+.tabs button.on{background:var(--cyan);color:#06243a;font-weight:600}
+.stage{position:relative;flex:1;min-height:0;background:#060b14;overflow:hidden}
+.imgwrap,.gl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .45s}
+.imgwrap{container-type:size}
+.imgwrap .frame{position:relative;width:min(100cqw,calc(100cqh * 640 / 420));aspect-ratio:640/420}
+.imgwrap .frame svg{width:100%;height:100%;display:block}
+.scan{position:absolute;left:0;right:0;height:70px;top:-70px;background:linear-gradient(180deg,transparent,rgba(56,189,248,.28),rgba(56,189,248,.65));border-bottom:2px solid var(--cyan);pointer-events:none;opacity:0}
+.scan.go{animation:scan 1.3s ease-in-out forwards}
+@keyframes scan{0%{top:-70px;opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+.hud{position:absolute;font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.85);text-shadow:0 1px 2px #000;pointer-events:none}
+.hud.tl{top:10px;left:12px}.hud.tr{top:10px;right:12px;text-align:right}.hud.bl{bottom:10px;left:12px}
+.reticle{position:absolute;inset:14px;border:1px solid rgba(255,255,255,.0);pointer-events:none}
+.reticle::before,.reticle::after{content:"";position:absolute;width:22px;height:22px;border:2px solid rgba(255,255,255,.55)}
+.reticle::before{top:0;left:0;border-right:none;border-bottom:none}
+.reticle::after{bottom:0;right:0;border-left:none;border-top:none}
+svg .bbox{fill:none;stroke-width:3;stroke-dasharray:900;stroke-dashoffset:900}
+svg.go .bbox{animation:draw 1s .9s ease forwards}
+svg .bbl{opacity:0} svg.go .bbl{animation:fade .4s 1.7s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fade{to{opacity:1}}
+
+.gl canvas{width:100%!important;height:100%!important;display:block;cursor:grab}
+.gl canvas:active{cursor:grabbing}
+.gl{background:radial-gradient(ellipse at 50% 20%,#2a4466 0%,#13223a 45%,#080e19 100%)}
+.views{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;background:rgba(10,16,28,.82);backdrop-filter:blur(6px);border:1px solid var(--line2);padding:5px;border-radius:10px}
+.views button{padding:7px 11px;border-radius:7px;font-size:12px;color:var(--muted);white-space:nowrap}
+.views button:hover{color:var(--text);background:var(--panel2)}
+.views button.on{color:#06243a;background:var(--amber);font-weight:600}
+.glhint{position:absolute;top:10px;left:12px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6;pointer-events:none}
+.glhint b{color:var(--cyan);font-weight:500}
+.lbl3d{position:absolute;transform:translate(-50%,-100%);pointer-events:none;white-space:nowrap}
+.lbl3d .card{background:rgba(10,16,28,.9);border:1px solid var(--amber);border-radius:7px;padding:5px 8px;font-size:11.5px;margin-bottom:34px}
+.lbl3d .card small{display:block;font-family:var(--mono);color:var(--muted);font-size:10px}
+.lbl3d::after{content:"";position:absolute;left:50%;bottom:0;width:1px;height:34px;background:var(--amber)}
+.pin{position:absolute;transform:translate(-50%,-50%);font-family:var(--mono);font-size:10px;background:rgba(56,189,248,.18);border:1px solid var(--cyan);color:var(--cyan);padding:1px 5px;border-radius:4px;cursor:pointer;white-space:nowrap}
+.pin:hover{background:var(--cyan);color:#06243a}
+.legend3d{position:absolute;top:10px;right:12px;font-size:11px;color:var(--muted);background:rgba(10,16,28,.75);border:1px solid var(--line2);border-radius:8px;padding:8px 10px;line-height:1.7;pointer-events:none}
+.legend3d i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.nogl{color:var(--muted);padding:30px;text-align:center;line-height:1.6}
+
+.finding{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;padding:12px 14px;border-top:1px solid var(--line);font-size:12.5px}
+.vlm{display:flex;gap:10px}
+.vlm .ai{flex:none;width:30px;height:30px;border-radius:8px;background:rgba(56,189,248,.13);display:flex;align-items:center;justify-content:center;color:var(--cyan);font-family:var(--mono);font-size:10px;font-weight:600}
+.vlm p{color:var(--muted);line-height:1.5;min-height:38px}
+.vlm p b{color:var(--text);font-weight:500}
+.caret{display:inline-block;width:7px;height:13px;background:var(--cyan);vertical-align:-2px;animation:blink .8s infinite;margin-left:1px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-family:var(--mono);font-size:11px}
+.kv span:nth-child(odd){color:var(--dim)} .kv span:nth-child(even){color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.confbar{display:inline-block;width:60px;height:5px;background:var(--panel2);border-radius:3px;vertical-align:1px;margin-left:6px;overflow:hidden}
+.confbar i{display:block;height:100%;background:var(--cyan)}
+
+/* ---------- Labelling ---------- */
+.lab{overflow:auto;flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+.lab>*{flex-shrink:0}
+.step{border:1px solid var(--line2);border-radius:10px;padding:12px;transition:opacity .3s,border-color .3s;background:var(--panel)}
+.step.locked{opacity:.38;pointer-events:none}
+.step.done{border-color:rgba(52,211,153,.45)}
+.step.active{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(56,189,248,.1)}
+.step.skip{opacity:.4;pointer-events:none}
+.sh{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.sh .num{width:22px;height:22px;border-radius:50%;background:var(--panel2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;flex:none}
+.step.done .num{background:var(--green);border-color:var(--green);color:#06281b}
+.step.active .num{background:var(--cyan);border-color:var(--cyan);color:#06243a}
+.sh h3{font-size:13px;font-weight:600;flex:1}
+.sh .st{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.opts{display:grid;gap:7px}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{border:1px solid var(--line2);border-radius:8px;padding:9px 10px;text-align:left;font-size:12.5px;background:var(--panel2);transition:.15s;position:relative;display:flex;align-items:center;gap:8px}
+.opt:hover{border-color:var(--muted)}
+.opt.sel{border-color:var(--cyan);background:rgba(56,189,248,.14)}
+.opt .ico{width:18px;height:18px;flex:none}
+.opt .aitag{position:absolute;top:-7px;right:6px;background:var(--panel);font-family:var(--mono);font-size:9.5px;color:var(--cyan);border:1px solid rgba(56,189,248,.45);padding:1px 5px;border-radius:4px}
+.opt.big{justify-content:center;padding:13px 10px;font-weight:600;font-size:13px}
+.opt.big.dmg.sel{border-color:var(--p1);background:rgba(239,68,68,.15)}
+.opt.big.ok.sel{border-color:var(--green);background:rgba(52,211,153,.13)}
+.prio{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center}
+.prio .pb{font-family:var(--mono);font-weight:600;text-align:center;border-radius:6px;padding:5px 0;font-size:12px}
+.prio small{display:block;color:var(--muted);font-size:11px}
+textarea{width:100%;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;color:var(--text);font-family:inherit;font-size:12.5px;padding:9px 10px;resize:none;height:56px}
+textarea:focus{outline:none;border-color:var(--cyan)}
+.submit{padding:13px;border-radius:10px;background:var(--amber);color:#2a1a00;font-weight:700;font-size:13.5px;transition:.2s}
+.submit:disabled{background:var(--panel2);color:var(--dim)}
+.submit:not(:disabled):hover{filter:brightness(1.08)}
+.dataset{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dim);padding:0 2px}
+.dataset b{color:var(--green);font-weight:500}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,30px);opacity:0;background:#0f2a22;border:1px solid var(--green);color:var(--text);padding:10px 16px;border-radius:9px;font-size:13px;transition:.35s;z-index:50;pointer-events:none}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:1180px){
+  main{grid-template-columns:1fr;height:auto}
+  .stage{height:56vw;min-height:320px;flex:none}
+  .pipe{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- =================== APP =================== -->
+<header>
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#152034"/><path d="M11 26 L15 7 L17 7 L21 26 M13 17 L19 17 M8 11 L24 11" stroke="#f5a524" stroke-width="2" fill="none"/><circle cx="24" cy="24" r="3" fill="#38bdf8"/></svg>
+    <div><b>TwinGrid Inspect</b><small>Damage labelling platform</small></div>
+  </div>
+  <div class="pipe" id="pipe"></div>
+  <div class="hdr-r">
+    <span class="mock-tag">MOCK · ILLUSTRATIVE DATA</span>
+  </div>
+</header>
+
+<main>
+  <!-- LEFT -->
+  <div class="col">
+    <div class="panel" style="flex:1.25">
+      <div class="ph"><h2>Flagged by VLM</h2><span class="cnt" id="qcount"></span></div>
+      <div class="mission">
+        Mission <b>M-1121</b> · Pilot corridor, 400 kV<br>
+        Twin <b>T-047</b> + adjoining spans · 3DGS v3<br>
+        <span id="progtxt">0 of 6 verified</span>
+        <div class="prog"><div id="progbar"></div></div>
+      </div>
+      <div class="queue" id="queue"></div>
+    </div>
+    <div class="panel" style="flex:1">
+      <div class="ph"><h2>Maintenance priority list</h2><span class="cnt">ranked</span></div>
+      <div class="plist" id="plist"><div class="pl-empty">Confirmed damages appear here, ranked by priority, as inspectors label them.</div></div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div class="panel">
+    <div class="vh">
+      <div class="title"><b id="vTitle">—</b><small id="vSub">—</small></div>
+      <div class="tabs">
+        <button class="on" id="tabImg">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5"/><path d="M1.5 11 L5.5 7 L9 10.5 L11 8.5 L14.5 12"/></svg>Flagged image</button>
+        <button id="tab3d">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 1.5 L14 4.8 V11.2 L8 14.5 L2 11.2 V4.8Z M2 4.8 L8 8 L14 4.8 M8 8 V14.5"/></svg>View in 3DGS twin</button>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <div class="imgwrap" id="imgwrap">
+        <div class="frame" id="frame">
+          <div id="imgHolder" style="width:100%;height:100%"></div>
+          <div class="scan" id="scan"></div>
+          <div class="reticle"></div>
+          <div class="hud tl" id="hudTL"></div>
+          <div class="hud tr" id="hudTR"></div>
+          <div class="hud bl" id="hudBL"></div>
+        </div>
+      </div>
+      <div class="gl" id="gl" style="opacity:0;pointer-events:none">
+        <div class="glhint"><b>3D Gaussian Splatting twin</b> · rendered live<br>drag to orbit · scroll to zoom · click a pin to jump</div>
+        <div class="legend3d"><i style="background:var(--amber)"></i>Selected flag<br><i style="background:var(--cyan)"></i>Other flags on this twin</div>
+        <div id="pins"></div>
+        <div class="lbl3d" id="lbl3d"><div class="card"><span id="lblT"></span><small id="lblS"></small></div></div>
+        <div class="views" id="views">
+          <button data-v="capture" class="on">📷 Capture viewpoint</button>
+          <button data-v="close">Close-up 360°</button>
+          <button data-v="front">Front</button>
+          <button data-v="side">Side</button>
+          <button data-v="top">Top</button>
+          <button data-v="span">Along span</button>
+        </div>
+      </div>
+    </div>
+    <div class="finding">
+      <div class="vlm"><div class="ai">VLM</div><p id="vlmText"></p></div>
+      <div class="kv" id="kv"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="panel">
+    <div class="ph"><h2>Inspector labelling</h2><span class="cnt" id="fid">—</span></div>
+    <div class="lab">
+      <section class="step active" id="s1">
+        <div class="sh"><span class="num">1</span><h3>Damage or no damage?</h3><span class="st" id="s1st">required</span></div>
+        <div class="opts two">
+          <button class="opt big dmg" data-v="damage">
+            <svg class="ico" viewBox="0 0 20 20" fill="none" stroke="#ef4444" stroke-width="2"><path d="M10 2 L18.5 17 H1.5Z"/><path d="M10 8 V12 M10 14.5 V14.6"/></svg>Damage</button>
+          <button class="opt big ok" data-v="none">
+            <svg class="ico" viewBox="0 0 20 20" fill="none" stroke="#34d399" stroke-width="2"><circle cx="10" cy="10" r="8"/><path d="M6 10 L9 13 L14 7"/></svg>No damage</button>
+        </div>
+      </section>
+
+      <section class="step locked" id="s2">
+        <div class="sh"><span class="num">2</span><h3>Type of damage</h3><span class="st" id="s2st">after step 1</span></div>
+        <div class="opts" id="typeOpts" style="grid-template-columns:1fr 1fr"></div>
+      </section>
+
+      <section class="step locked" id="s3">
+        <div class="sh"><span class="num">3</span><h3>Priority rank</h3><span class="st" id="s3st">after step 2</span></div>
+        <div class="opts" id="prioOpts"></div>
+      </section>
+
+      <textarea id="note" placeholder="Inspector note (optional), e.g. 'confirmed from 3D side view'"></textarea>
+      <button class="submit" id="submit" disabled>Confirm label &amp; next flag →</button>
+      <div class="dataset"><span>Verified dataset</span><span><b id="dsN">0</b> labelled samples</span></div>
+    </div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ======================================================================
+   DATA
+   ====================================================================== */
+const TYPES = [
+  {k:'buckle', n:'Member buckling / bending'},
+  {k:'twist',  n:'Member twisting'},
+  {k:'fast',   n:'Fastener failure / missing bolt'},
+  {k:'corr',   n:'Corrosion'},
+  {k:'strand', n:'Broken / frayed conductor strands'},
+  {k:'cage',   n:'Earthing cable birdcaging'},
+  {k:'insul',  n:'Damaged string insulator'},
+  {k:'other',  n:'Other'}
+];
+const PRIOS = [
+  {k:'P1', n:'Critical', d:'Immediate action · risk of failure', c:'var(--p1)', tc:'#fff'},
+  {k:'P2', n:'High',     d:'Repair within 7 days',              c:'var(--p2)', tc:'#fff'},
+  {k:'P3', n:'Medium',   d:'Next scheduled maintenance',        c:'var(--p3)', tc:'#111'},
+  {k:'P4', n:'Low',      d:'Monitor in future scans',           c:'var(--p4)', tc:'#0b1220'}
+];
+// 3D positions are filled once the twin is built
+const ITEMS = [
+  {id:'F-0147', title:'Insulator string, upper right phase', loc:'Tower T-047 · cross-arm 3 (right)', img:'insul', ai:'insul', conf:.91,
+   vlm:'<b>Damaged string insulator.</b> Disc 6 of 12 shows a missing shed segment with radial cracking on the underside.', file:'IMG_0832', cap:'07:42:16', stand:'7.8 m', key:'ins'},
+  {id:'F-0151', title:'Conductor, middle left phase', loc:'Span T-047 → T-048 · 14 m from clamp', img:'strand', ai:'strand', conf:.84,
+   vlm:'<b>Broken / frayed strands.</b> Several outer-layer strands appear separated and splayed from the conductor.', file:'IMG_0861', cap:'07:44:03', stand:'6.5 m', key:'str'},
+  {id:'F-0153', title:'Bracing diagonal, front face', loc:'Tower T-047 · panel 3 (12–18 m)', img:'buckle', ai:'buckle', conf:.78,
+   vlm:'<b>Member bending.</b> Diagonal bracing member deviates from a straight line between its end joints.', file:'IMG_0874', cap:'07:45:40', stand:'9.1 m', key:'bnd'},
+  {id:'F-0158', title:'Leg joint gusset plate', loc:'Tower T-047 · leg B · 18 m', img:'corr', ai:'corr', conf:.88,
+   vlm:'<b>Corrosion.</b> Red-brown oxidation around bolt heads and plate edge, consistent with surface rust.', file:'IMG_0890', cap:'07:46:58', stand:'5.2 m', key:'cor'},
+  {id:'F-0162', title:'Earth wire', loc:'Span T-046 → T-047 · 12 m from peak', img:'cage', ai:'cage', conf:.81,
+   vlm:'<b>Earthing cable birdcaging.</b> Outer strands bulge outward from the core over a short length.', file:'IMG_0915', cap:'07:49:21', stand:'6.0 m', key:'cge'},
+  {id:'F-0166', title:'Horizontal member, right face', loc:'Tower T-047 · 24 m', img:'shadow', ai:'other', conf:.54,
+   vlm:'<b>Possible crack (low confidence).</b> Dark linear feature across the member surface. May be a shadow from adjacent bracing.', file:'IMG_0927', cap:'07:50:12', stand:'8.4 m', key:'fp'}
+];
+const labels = {};      // id -> {verdict,type,prio,note}
+let cur = 0;
+let draft = {verdict:null,type:null,prio:null};
+
+/* ======================================================================
+   SVG "DRONE PHOTOS"
+   ====================================================================== */
+function bg(p, warm){
+  return `<defs>
+    <linearGradient id="${p}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${warm?'#8fb4cf':'#7ea8c9'}"/><stop offset="1" stop-color="#dfe8ee"/></linearGradient>
+    <linearGradient id="${p}m" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9aa3ab"/><stop offset=".5" stop-color="#6e777f"/><stop offset="1" stop-color="#4c545b"/></linearGradient>
+    <filter id="${p}n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .5  0 0 0 0 .5  0 0 0 .55 0"/></filter>
+    <filter id="${p}b"><feGaussianBlur stdDeviation="3"/></filter>
+    <filter id="${p}b2"><feGaussianBlur stdDeviation="1.2"/></filter>
+  </defs>
+  <rect width="640" height="420" fill="url(#${p}s)"/>
+  <path d="M0 360 L60 330 L130 345 L210 312 L290 338 L370 318 L450 342 L530 305 L640 335 L640 420 L0 420Z" fill="#9a8a78" opacity=".45" filter="url(#${p}b)"/>`;
+}
+function grain(p){return `<rect width="640" height="420" filter="url(#${p}n)" opacity=".18"/>`}
+function box(x,y,w,h,txt,col){
+  const tw = txt.length*7.4+14;
+  return `<rect class="bbox" x="${x}" y="${y}" width="${w}" height="${h}" stroke="${col}" rx="2"/>
+  <g class="bbl"><rect x="${x}" y="${y-22}" width="${tw}" height="20" fill="${col}" rx="2"/><text x="${x+7}" y="${y-8}" font-family="IBM Plex Mono" font-size="12" fill="#fff">${txt}</text></g>`;
+}
+const IMG = {
+  insul(p, thumb){
+    let s = bg(p);
+    s += `<path d="M150 0 L490 0 L470 48 L170 48Z" fill="url(#${p}m)"/><path d="M170 48 L470 48" stroke="#3d444a" stroke-width="3"/>
+          <rect x="312" y="48" width="16" height="36" fill="#5a6168"/><circle cx="320" cy="62" r="5" fill="#3d444a"/>
+          <rect x="317" y="84" width="6" height="330" fill="#4d5359"/>`;
+    for(let i=0;i<12;i++){
+      const y = 98+i*26;
+      s += `<ellipse cx="320" cy="${y+4}" rx="50" ry="12" fill="#4f6a66"/>
+            <ellipse cx="320" cy="${y}" rx="50" ry="12" fill="#86a7a0"/>
+            <ellipse cx="306" cy="${y-3}" rx="22" ry="4" fill="#c9e0da" opacity=".7"/>`;
+      if(i===5){
+        s += `<path d="M345 ${y-12} L372 ${y-6} L366 ${y+3} L358 ${y-1} L350 ${y+9} L338 ${y+2} Z" fill="url(#${p}s)"/>
+              <path d="M338 ${y+2} L350 ${y+9} L358 ${y-1} L366 ${y+3} L370 ${y+8}" stroke="#2f3a38" stroke-width="2" fill="none"/>
+              <path d="M330 ${y+1} L318 ${y+10} M334 ${y-4} L312 ${y-8} M336 ${y+6} L326 ${y+15}" stroke="#2f3a38" stroke-width="1.4"/>`;
+      }
+    }
+    s += grain(p);
+    if(!thumb) s += box(258,212,140,58,'insulator 0.91','#ef4444');
+    return s;
+  },
+  strand(p, thumb){
+    let s = bg(p);
+    const path = 'M-20 110 C 180 150, 420 230, 660 300';
+    s += `<path d="${path}" stroke="#3b4147" stroke-width="30" fill="none"/>
+          <path d="${path}" stroke="#7c858d" stroke-width="24" fill="none" stroke-dasharray="7 5"/>
+          <path d="${path}" stroke="#aab3ba" stroke-width="6" fill="none" opacity=".55" transform="translate(0,-7)"/>`;
+    const rays=[[330,196,300,150],[336,198,322,140],[344,202,360,150],[350,206,392,170],[338,214,316,262],[346,218,348,270],[354,218,390,252]];
+    rays.forEach(r=>{ s+=`<path d="M${r[0]} ${r[1]} Q ${(r[0]+r[2])/2+8} ${(r[1]+r[3])/2-6} ${r[2]} ${r[3]}" stroke="#b7c0c7" stroke-width="3.2" fill="none" stroke-linecap="round"/>`; });
+    s += grain(p);
+    if(!thumb) s += box(280,128,138,154,'strands 0.84','#f97316');
+    return s;
+  },
+  buckle(p, thumb){
+    let s = bg(p);
+    const m = `stroke="url(#${p}m)" stroke-width="15" fill="none" stroke-linecap="square"`;
+    s += `<path d="M110 420 L190 0" ${m}/><path d="M540 420 L460 0" ${m}/>
+          <path d="M180 60 L470 60" ${m}/><path d="M130 330 L520 330" ${m}/>
+          <path d="M466 60 L136 330" stroke="#6d757c" stroke-width="11" fill="none"/>
+          <path d="M184 60 Q 270 260 514 330" stroke="#6d757c" stroke-width="11" fill="none"/>
+          <path d="M184 60 Q 270 260 514 330" stroke="#a6aeb5" stroke-width="2" fill="none" transform="translate(-3,-4)"/>`;
+    [[184,60],[466,60],[136,330],[514,330]].forEach(c=>{ s+=`<circle cx="${c[0]}" cy="${c[1]}" r="9" fill="#3d444a"/><circle cx="${c[0]+14}" cy="${c[1]+4}" r="5" fill="#3d444a"/>`; });
+    s += `<path d="M184 60 L514 330" stroke="#ffffff" stroke-width="1.3" stroke-dasharray="6 6" opacity="${thumb?0:.75}"/>`;
+    s += grain(p);
+    if(!thumb) s += box(208,140,170,140,'bending 0.78','#f97316');
+    return s;
+  },
+  corr(p, thumb){
+    let s = bg(p,true);
+    s += `<path d="M150 420 L250 0 L300 0 L210 420Z" fill="url(#${p}m)"/>
+          <path d="M0 250 L640 160 L640 200 L0 300Z" fill="#6c757c"/>
+          <path d="M170 110 L420 80 L470 290 L200 340Z" fill="#7f878e" stroke="#4a5157" stroke-width="3"/>`;
+    const bolts=[[230,150],[300,140],[370,130],[250,240],[330,225],[410,212],[270,300],[360,285]];
+    s += `<g filter="url(#${p}b)" opacity=".9">
+      <ellipse cx="330" cy="200" rx="90" ry="55" fill="#8b4a22" opacity=".55"/>
+      <ellipse cx="370" cy="150" rx="40" ry="30" fill="#a8582a" opacity=".7"/>
+      <ellipse cx="300" cy="240" rx="50" ry="26" fill="#9c4f24" opacity=".7"/>
+      <ellipse cx="420" cy="230" rx="26" ry="36" fill="#7a3d1b" opacity=".7"/></g>`;
+    bolts.forEach(b=>{ s+=`<circle cx="${b[0]}" cy="${b[1]}" r="12" fill="#4a3a30"/><circle cx="${b[0]}" cy="${b[1]}" r="7" fill="#6b4a33"/><circle cx="${b[0]+3}" cy="${b[1]+5}" r="9" fill="#b0622c" opacity=".55" filter="url(#${p}b2)"/>`; });
+    s += grain(p);
+    if(!thumb) s += box(232,102,232,180,'corrosion 0.88','#eab308');
+    return s;
+  },
+  cage(p, thumb){
+    let s = bg(p);
+    const y0 = 205;
+    s += `<path d="M-10 ${y0-30} Q 320 ${y0+20} 650 ${y0-10}" stroke="#3d444a" stroke-width="20" fill="none"/>
+          <path d="M-10 ${y0-30} Q 320 ${y0+20} 650 ${y0-10}" stroke="#868f97" stroke-width="15" fill="none" stroke-dasharray="6 4"/>`;
+    // bulge region approx y at x 290..370 ~ y0-5
+    const cy = y0-4;
+    s += `<rect x="296" y="${cy-9}" width="72" height="18" fill="url(#${p}s)"/>
+          <rect x="300" y="${cy-3}" width="64" height="6" fill="#3d444a"/>`;
+    [-34,-26,-18,-10,10,18,26,34].forEach(o=>{ s+=`<path d="M292 ${cy+(o>0?4:-4)} C 312 ${cy+o}, 352 ${cy+o}, 372 ${cy+(o>0?4:-4)}" stroke="#a9b2b9" stroke-width="3" fill="none"/>`; });
+    s += grain(p);
+    if(!thumb) s += box(270,150,124,106,'birdcage 0.81','#f97316');
+    return s;
+  },
+  shadow(p, thumb){
+    let s = bg(p);
+    s += `<path d="M0 160 L640 120 L640 220 L0 270Z" fill="url(#${p}m)"/>
+          <path d="M0 160 L640 120" stroke="#b9c1c8" stroke-width="3"/>
+          <path d="M0 215 L640 172" stroke="#4d555c" stroke-width="2" opacity=".6"/>
+          <path d="M300 0 L340 0 L300 420 L262 420Z" fill="#7a838a" opacity=".0"/>
+          <path d="M282 140 L330 136 L318 232 L268 240Z" fill="#000" opacity=".33" filter="url(#${p}b2)"/>`;
+    [[110,195],[540,160]].forEach(b=>{ s+=`<circle cx="${b[0]}" cy="${b[1]}" r="9" fill="#3d444a"/>`; });
+    s += grain(p);
+    if(!thumb) s += box(250,118,100,138,'crack? 0.54','#38bdf8');
+    return s;
+  }
+};
+function svgFor(item, thumb, prefix){
+  return `<svg viewBox="0 0 640 420" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">${IMG[item.img](prefix, thumb)}</svg>`;
+}
+
+/* ======================================================================
+   UI
+   ====================================================================== */
+const $ = s => document.querySelector(s);
+const PIPE = ['Scan','Transfer','Reconstruct · 3DGS','Detect · VLM','Label · Inspector','Decide'];
+$('#pipe').innerHTML = PIPE.map((p,i)=>`<div class="st ${i===4?'now':i>4?'next':''}"><i></i>${p}</div>${i<PIPE.length-1?'<div class="ar"></div>':''}`).join('');
+
+function chipFor(it){
+  const l = labels[it.id];
+  if(!l) return `<span class="chip pend">pending</span>`;
+  if(l.verdict==='none') return `<span class="chip no">no damage</span>`;
+  return `<span class="chip ${l.prio}">${l.prio}</span>`;
+}
+function renderQueue(){
+  $('#queue').innerHTML = ITEMS.map((it,i)=>`
+    <div class="qi ${i===cur?'active':''}" data-i="${i}">
+      <div class="thumb">${svgFor(it,true,'t'+i)}</div>
+      <div class="meta"><div class="t1">${it.title}</div><div class="t2">${it.id} · conf ${it.conf.toFixed(2)}</div></div>
+      ${chipFor(it)}
+    </div>`).join('');
+  document.querySelectorAll('.qi').forEach(el=>el.onclick=()=>load(+el.dataset.i));
+  const n = Object.keys(labels).length;
+  $('#qcount').textContent = `${ITEMS.length} flags`;
+  $('#progtxt').textContent = `${n} of ${ITEMS.length} verified`;
+  $('#progbar').style.width = (n/ITEMS.length*100)+'%';
+  $('#dsN').textContent = n;
+}
+function renderPList(){
+  const rows = ITEMS.filter(it=>labels[it.id] && labels[it.id].verdict==='damage')
+    .sort((a,b)=>labels[a.id].prio.localeCompare(labels[b.id].prio) || b.conf-a.conf);
+  if(!rows.length){ $('#plist').innerHTML = '<div class="pl-empty">Confirmed damages appear here, ranked by priority, as inspectors label them.</div>'; return; }
+  $('#plist').innerHTML = rows.map((it,i)=>{
+    const l = labels[it.id], t = TYPES.find(t=>t.k===l.type).n;
+    return `<div class="pli" data-id="${it.id}"><span class="rk">${String(i+1).padStart(2,'0')}</span><span class="chip ${l.prio}" style="text-align:center">${l.prio}</span>
+      <span class="ti">${t}<small>${it.loc.split(' · ')[0]} · ${it.id}</small></span></div>`;
+  }).join('');
+  document.querySelectorAll('.pli').forEach(el=>el.onclick=()=>load(ITEMS.findIndex(x=>x.id===el.dataset.id)));
+}
+
+let typer;
+function typeText(html){
+  clearInterval(typer);
+  const el = $('#vlmText');
+  // type plain text, then swap in formatted html
+  const tmp = document.createElement('div'); tmp.innerHTML = html; const plain = tmp.textContent;
+  let i = 0; el.innerHTML = '<span class="caret"></span>';
+  setTimeout(()=>{
+    typer = setInterval(()=>{
+      i += 2;
+      if(i >= plain.length){ clearInterval(typer); el.innerHTML = html; return; }
+      el.innerHTML = plain.slice(0,i).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '<span class="caret"></span>';
+    }, 16);
+  }, 1500);
+}
+
+function load(i){
+  cur = i; const it = ITEMS[i];
+  const l = labels[it.id];
+  draft = l ? {...l} : {verdict:null,type:null,prio:null};
+  $('#note').value = l ? (l.note||'') : '';
+  $('#vTitle').textContent = it.title;
+  $('#vSub').textContent = it.loc;
+  $('#fid').textContent = it.id;
+  // image
+  $('#imgHolder').innerHTML = svgFor(it,false,'m'+i+'_'+Date.now());
+  const sv = $('#imgHolder svg');
+  const sc = $('#scan'); sc.classList.remove('go'); void sc.offsetWidth; sc.classList.add('go');
+  requestAnimationFrame(()=>sv.classList.add('go'));
+  $('#hudTL').innerHTML = `${it.file}.JPG · 48 MP<br>${it.loc.split(' · ')[0]}`;
+  $('#hudTR').innerHTML = `2026-11-18 ${it.cap}<br>standoff ${it.stand}`;
+  $('#hudBL').innerHTML = `VLM screening · ${it.id}`;
+  typeText(it.vlm);
+  $('#kv').innerHTML = `
+    <span>Flag</span><span>${it.id}</span>
+    <span>VLM conf.</span><span>${it.conf.toFixed(2)}<span class="confbar"><i style="width:${it.conf*100}%"></i></span></span>
+    <span>Captured</span><span>M30T · 2026-11-18 ${it.cap}</span>
+    <span>3D location</span><span id="xyz">—</span>`;
+  if(TW.ready){ TW.focus(i); const p = TW.pos[it.key]; $('#xyz').textContent = `x ${p.x.toFixed(1)} y ${p.y.toFixed(1)} z ${p.z.toFixed(1)} m`; }
+  renderQueue(); renderSteps();
+}
+
+/* label steps */
+$('#typeOpts').innerHTML = TYPES.map(t=>`<button class="opt" data-v="${t.k}">${t.n}<span class="aitag" style="display:none">VLM suggests</span></button>`).join('');
+$('#prioOpts').innerHTML = PRIOS.map(p=>`<button class="opt prio" data-v="${p.k}"><span class="pb" style="background:${p.c};color:${p.tc}">${p.k}</span><span>${p.n}<small>${p.d}</small></span></button>`).join('');
+document.querySelectorAll('#s1 .opt').forEach(b=>b.onclick=()=>{ draft.verdict=b.dataset.v; if(draft.verdict==='none'){draft.type=null;draft.prio=null;} renderSteps(); });
+document.querySelectorAll('#typeOpts .opt').forEach(b=>b.onclick=()=>{ draft.type=b.dataset.v; renderSteps(); });
+document.querySelectorAll('#prioOpts .opt').forEach(b=>b.onclick=()=>{ draft.prio=b.dataset.v; renderSteps(); });
+
+function setStep(el, cls){ el.className = 'step ' + cls; }
+function renderSteps(){
+  const it = ITEMS[cur];
+  document.querySelectorAll('#s1 .opt').forEach(b=>b.classList.toggle('sel', b.dataset.v===draft.verdict));
+  document.querySelectorAll('#typeOpts .opt').forEach(b=>{ b.classList.toggle('sel', b.dataset.v===draft.type); b.querySelector('.aitag').style.display = b.dataset.v===it.ai?'':'none'; });
+  document.querySelectorAll('#prioOpts .opt').forEach(b=>b.classList.toggle('sel', b.dataset.v===draft.prio));
+  const s1=$('#s1'), s2=$('#s2'), s3=$('#s3');
+  if(!draft.verdict){ setStep(s1,'active'); setStep(s2,'locked'); setStep(s3,'locked');
+    $('#s1st').textContent='required'; $('#s2st').textContent='after step 1'; $('#s3st').textContent='after step 2'; }
+  else if(draft.verdict==='none'){ setStep(s1,'done'); setStep(s2,'skip'); setStep(s3,'skip');
+    $('#s1st').textContent='no damage'; $('#s2st').textContent='not required'; $('#s3st').textContent='not required'; }
+  else {
+    setStep(s1,'done'); $('#s1st').textContent='damage';
+    if(!draft.type){ setStep(s2,'active'); setStep(s3,'locked'); $('#s2st').textContent='required'; $('#s3st').textContent='after step 2'; }
+    else { setStep(s2,'done'); $('#s2st').textContent= draft.type===it.ai?'agrees with VLM':'corrected';
+      if(!draft.prio){ setStep(s3,'active'); $('#s3st').textContent='required'; }
+      else { setStep(s3,'done'); $('#s3st').textContent=draft.prio; } }
+  }
+  $('#submit').disabled = !(draft.verdict==='none' || (draft.type && draft.prio));
+}
+$('#submit').onclick = ()=>{
+  const it = ITEMS[cur];
+  labels[it.id] = {...draft, note:$('#note').value};
+  renderPList();
+  toast(draft.verdict==='none' ? `${it.id} rejected as false positive · added to dataset` : `${it.id} confirmed · ${draft.prio} · added to priority list`);
+  const nxt = ITEMS.findIndex((x,j)=>j>cur && !labels[x.id]);
+  const any = ITEMS.findIndex(x=>!labels[x.id]);
+  if(nxt>=0) load(nxt); else if(any>=0) load(any); else { renderQueue(); renderSteps(); toast('All flags verified · priority list ready for maintenance planning'); }
+};
+let tt; function toast(m){ const t=$('#toast'); t.textContent='✓ '+m; t.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('on'),2600); }
+
+/* tabs */
+function showTab(three){
+  $('#tabImg').classList.toggle('on',!three); $('#tab3d').classList.toggle('on',three);
+  $('#imgwrap').style.opacity = three?0:1; $('#imgwrap').style.pointerEvents = three?'none':'';
+  $('#gl').style.opacity = three?1:0; $('#gl').style.pointerEvents = three?'':'none';
+  TW.visible = three;
+  if(three && TW.ready){ TW.resize(); TW.preset('capture'); }
+}
+$('#tabImg').onclick=()=>showTab(false);
+$('#tab3d').onclick=()=>showTab(true);
+document.querySelectorAll('#views button').forEach(b=>b.onclick=()=>TW.preset(b.dataset.v));
+
+/* ======================================================================
+   3D GAUSSIAN SPLAT TWIN (procedural mock)
+   ====================================================================== */
+const TW = {ready:false, visible:false, pos:{}};
+(function initTwin(){
+  if(typeof THREE==='undefined'){ $('#gl').innerHTML='<div class="nogl">3D viewer needs WebGL and three.js, which did not load in this browser.</div>'; return; }
+  const host = $('#gl');
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  host.prepend(renderer.domElement);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45,1,0.1,600);
+
+  const P=[], C=[], Sz=[];
+  let seed = 7; const rnd = ()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+  const gauss = ()=> (rnd()+rnd()+rnd()-1.5)/1.5;
+  function add(x,y,z,c,s){ P.push(x,y,z); const v=(rnd()-.5)*.08; C.push(c[0]+v,c[1]+v,c[2]+v); Sz.push(s*(.7+rnd()*.6)); }
+  const STEEL=[.66,.69,.72], DARK=[.35,.37,.40];
+  function seg(a,b,o={}){
+    const rad=o.rad??.11, dens=o.dens??26, col=o.col||STEEL, size=o.size??.32, bend=o.bend||0;
+    const d=new THREE.Vector3().subVectors(b,a), L=d.length(); const n=Math.ceil(L*dens);
+    const perp = o.bendDir || new THREE.Vector3(0,0,1);
+    for(let i=0;i<n;i++){
+      const t=rnd(); const p=a.clone().addScaledVector(d,t);
+      if(bend) p.addScaledVector(perp, Math.sin(Math.PI*t)*bend);
+      add(p.x+gauss()*rad, p.y+gauss()*rad, p.z+gauss()*rad, col, size);
+    }
+  }
+  const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+  const w = y => y<=30 ? 5-3.5*y/30 : 1.5-0.4*(y-30)/12;
+  const corner=(y,sx,sz)=>V(sx*w(y),y,sz*w(y));
+  const lv=[0,6,12,18,24,30,35,40,42];
+  const faces=[[[-1,1],[1,1]],[[1,1],[1,-1]],[[1,-1],[-1,-1]],[[-1,-1],[-1,1]]];
+  // legs
+  [[1,1],[1,-1],[-1,-1],[-1,1]].forEach(([sx,sz])=>{ for(let i=0;i<lv.length-1;i++) seg(corner(lv[i],sx,sz),corner(lv[i+1],sx,sz),{rad:.16,size:.4,col:[.6,.63,.66]}); });
+  // faces
+  let bentA,bentB;
+  for(let i=0;i<lv.length-1;i++){
+    const y0=lv[i], y1=lv[i+1];
+    faces.forEach((f,fi)=>{
+      const a0=corner(y0,...f[0]), b0=corner(y0,...f[1]), a1=corner(y1,...f[0]), b1=corner(y1,...f[1]);
+      seg(a0,b0);
+      if(fi===0 && y0===12){ bentA=a0; bentB=b1; seg(a0,b1,{bend:.9,bendDir:V(0,-.5,1).normalize()}); }
+      else seg(a0,b1);
+      seg(b0,a1);
+    });
+  }
+  // peak
+  seg(corner(42,1,1),V(0,45,0),{rad:.09}); seg(corner(42,-1,-1),V(0,45,0),{rad:.09});
+  seg(corner(42,1,-1),V(0,45,0),{rad:.09}); seg(corner(42,-1,1),V(0,45,0),{rad:.09});
+  // cross arms
+  const arms=[[30,9.5],[35,8.5],[40,7]];
+  const attach=[];
+  arms.forEach(([y,L])=>{ [1,-1].forEach(sx=>{
+    const tip=V(sx*L,y,0);
+    seg(V(sx*w(y),y,w(y)),tip); seg(V(sx*w(y),y,-w(y)),tip);
+    seg(V(sx*w(y+2.5),y+2.5,0),tip);
+    for(let k=1;k<4;k++){ const t=k/4; const x=sx*(w(y)+(L-w(y))*t); seg(V(x,y,w(y)*(1-t)),V(x,y+2.5*(1-t),0),{rad:.07,size:.26}); seg(V(x,y,-w(y)*(1-t)),V(x,y+2.5*(1-t),0),{rad:.07,size:.26}); }
+    // insulator string
+    const top=y-.2, len=4;
+    seg(V(sx*L,top,0),V(sx*L,top-len,0),{rad:.03,size:.18,col:DARK});
+    for(let d=0;d<12;d++){
+      const yy=top-.3-d*.31;
+      const isDef = (sx===1 && y===40 && d===5);
+      for(let k=0;k<70;k++){
+        const ang=rnd()*Math.PI*2;
+        if(isDef && ang>-.2 && ang<1.4) continue;     // missing shed segment
+        const r=.15+rnd()*.32;
+        add(sx*L+Math.cos(ang)*r, yy+gauss()*.03, Math.sin(ang)*r, isDef?[.42,.5,.48]:[.55,.7,.66], .2);
+      }
+    }
+    attach.push({x:sx*L,y:top-len,sx,arm:y});
+  });});
+  // conductors (catenary to neighbour towers at z=±70)
+  const span=70, sag=5;
+  const cy=(yA,z)=>{ const u=Math.abs(z); const m=span/2; return yA - sag*(1-((u-m)/m)**2); };
+  attach.forEach(a=>{
+    const n=900;
+    for(let i=0;i<n;i++){ const z=(rnd()*2-1)*span; add(a.x+gauss()*.05, cy(a.y,z)+gauss()*.05, z, [.3,.32,.35], .22); }
+  });
+  // earth wire
+  const ew=y=>45 - 3*(1-((Math.abs(y)-span/2)/(span/2))**2);
+  for(let i=0;i<700;i++){ const z=(rnd()*2-1)*span; add(gauss()*.04, ew(z)+gauss()*.04, z, [.4,.42,.45], .18); }
+
+  // ---- defects
+  // 1 insulator (upper right, disc 6)
+  TW.pos.ins = V(7,40-.2-.3-5*.31,0);
+  // 2 broken strands: middle-left phase, z=+14
+  const sA=attach.find(a=>a.sx===-1&&a.arm===35); const zS=14;
+  TW.pos.str = V(sA.x, cy(sA.y,zS), zS);
+  for(let i=0;i<160;i++){ const dir=V(gauss()*.3,gauss(),gauss()*.2+.15).normalize(); const r=rnd()*.9; add(TW.pos.str.x+dir.x*r, TW.pos.str.y+dir.y*r, TW.pos.str.z+dir.z*r+gauss()*.3, [.78,.8,.82], .14); }
+  // 3 bent member (mid of bent diagonal)
+  TW.pos.bnd = bentA.clone().lerp(bentB,.5).addScaledVector(V(0,-.5,1).normalize(),.9);
+  // 4 corrosion at leg joint (front-right, 18 m)
+  TW.pos.cor = corner(18,1,1);
+  for(let i=0;i<420;i++){ add(TW.pos.cor.x+gauss()*.45, TW.pos.cor.y+gauss()*.6, TW.pos.cor.z+gauss()*.45, rnd()<.6?[.62,.32,.14]:[.48,.25,.12], .26); }
+  // 5 birdcaging on earth wire z=-12
+  const zC=-12; TW.pos.cge = V(0,ew(zC),zC);
+  for(let i=0;i<260;i++){ const zz=zC+(rnd()-.5)*1.4; const bul=Math.sin(Math.PI*((zz-zC)/1.4+.5))*.35+.05; const a=rnd()*Math.PI*2; add(Math.cos(a)*bul, ew(zz)+Math.sin(a)*bul, zz, [.7,.72,.75], .12); }
+  // 6 false positive (no geometric defect): right face, 24 m
+  TW.pos.fp = V(w(24),24,0);
+
+  // ground (desert) + foundations
+  const gStart=P.length/3;
+  for(let i=0;i<26000;i++){ const r=Math.sqrt(rnd())*95, a=rnd()*Math.PI*2; const x=Math.cos(a)*r, z=Math.sin(a)*r;
+    const h=Math.sin(x*.07)*.6+Math.cos(z*.05)*.8+gauss()*.15 - 1.2; const t=rnd();
+    add(x,h,z, t<.08?[.45,.38,.3]:[.78-.1*t,.64-.08*t,.46-.06*t], 1.5); }
+  [[1,1],[1,-1],[-1,-1],[-1,1]].forEach(([sx,sz])=>{ for(let i=0;i<160;i++) add(sx*5+gauss()*.7,-.2+rnd()*.5,sz*5+gauss()*.7,[.7,.7,.68],.45); });
+
+  function mkGeo(a,b){ const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(P.slice(a*3,b*3),3));
+    g.setAttribute('aColor',new THREE.Float32BufferAttribute(C.slice(a*3,b*3),3));
+    g.setAttribute('aSize',new THREE.Float32BufferAttribute(Sz.slice(a,b),1)); return g; }
+  const nAll=P.length/3;
+  const mat=new THREE.ShaderMaterial({
+    uniforms:{uScale:{value:500},uFocus:{value:new THREE.Vector3()},uHi:{value:1},uT:{value:0}},
+    vertexShader:`attribute vec3 aColor; attribute float aSize; uniform float uScale; uniform vec3 uFocus; uniform float uT;
+      varying vec3 vC; varying float vH;
+      void main(){ vC=aColor; vec4 mv=modelViewMatrix*vec4(position,1.0);
+        gl_PointSize=clamp(aSize*uScale/(-mv.z),1.0,90.0); gl_Position=projectionMatrix*mv;
+        float d=distance(position,uFocus); vH=(1.0-smoothstep(0.0,1.4,d))*(0.55+0.45*sin(uT*4.0)); }`,
+    fragmentShader:`varying vec3 vC; varying float vH; uniform float uHi;
+      void main(){ vec2 c=gl_PointCoord-0.5; float r2=dot(c,c)*4.0; float a=exp(-r2*3.2); if(a<0.06) discard;
+        vec3 col=mix(vC, vec3(1.0,0.62,0.12), vH*uHi*0.55); gl_FragColor=vec4(col,a*0.92); }`,
+    transparent:true, depthWrite:false
+  });
+  const gmat=mat.clone(); gmat.uniforms=mat.uniforms; gmat.depthWrite=true;
+  const ground=new THREE.Points(mkGeo(gStart,nAll),gmat); ground.renderOrder=-1; scene.add(ground);
+  const towerPts=new THREE.Points(mkGeo(0,gStart),mat); towerPts.renderOrder=1; scene.add(towerPts);
+
+  // marker ring
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.62,.78,48),new THREE.MeshBasicMaterial({color:0xf5a524,transparent:true,depthTest:false,side:THREE.DoubleSide}));
+  ring.renderOrder=999; scene.add(ring);
+
+  // pins for other flags
+  const pinsEl=$('#pins');
+  ITEMS.forEach((it,i)=>{ const d=document.createElement('div'); d.className='pin'; d.textContent=it.id; d.onclick=()=>{ load(i); TW.preset('capture'); }; pinsEl.appendChild(d); it._pin=d; });
+
+  // camera rig
+  const rig={tgt:V(0,22,0),th:.6,ph:1.25,r:80}, goal={tgt:V(0,22,0),th:.6,ph:1.25,r:80};
+  let auto=false, curView='capture';
+  function viewsFor(it){
+    const p=TW.pos[it.key];
+    const VIEWS={
+      ins:{th:Math.PI/2+.25,ph:1.42,r:5.5}, str:{th:-Math.PI/2+.5,ph:1.25,r:6},
+      bnd:{th:.15,ph:1.45,r:9}, cor:{th:Math.PI/4,ph:1.4,r:6}, cge:{th:-Math.PI/2+.6,ph:1.1,r:6}, fp:{th:Math.PI/2,ph:1.45,r:7}
+    };
+    return {p, cap:VIEWS[it.key]};
+  }
+  TW.preset=function(v){
+    curView=v; auto=(v==='close');
+    document.querySelectorAll('#views button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+    const {p,cap}=viewsFor(ITEMS[cur]);
+    if(v==='capture'){ goal.tgt.copy(p); goal.th=cap.th; goal.ph=cap.ph; goal.r=cap.r; }
+    if(v==='close'){ goal.tgt.copy(p); goal.th=rig.th; goal.ph=1.3; goal.r=cap.r*1.6; }
+    if(v==='front'){ goal.tgt.set(0,22,0); goal.th=0; goal.ph=1.5; goal.r=78; }
+    if(v==='side'){ goal.tgt.set(0,22,0); goal.th=Math.PI/2; goal.ph=1.5; goal.r=78; }
+    if(v==='top'){ goal.tgt.set(0,20,0); goal.th=.001; goal.ph=.06; goal.r=95; }
+    if(v==='span'){ goal.tgt.set(0,34,0); goal.th=Math.PI*0.97; goal.ph=1.42; goal.r=55; }
+  };
+  TW.focus=function(i){ mat.uniforms.uFocus.value.copy(TW.pos[ITEMS[i].key]); if(TW.visible) TW.preset('capture'); else { const {p,cap}=viewsFor(ITEMS[i]); rig.tgt.copy(p); rig.th=cap.th; rig.ph=cap.ph; rig.r=cap.r; goal.tgt.copy(p); goal.th=cap.th; goal.ph=cap.ph; goal.r=cap.r; } };
+
+  // interaction
+  const cv=renderer.domElement; let drag=null;
+  cv.addEventListener('pointerdown',e=>{ drag={x:e.clientX,y:e.clientY}; cv.setPointerCapture(e.pointerId); auto=false; });
+  cv.addEventListener('pointermove',e=>{ if(!drag) return; const dx=e.clientX-drag.x, dy=e.clientY-drag.y; drag={x:e.clientX,y:e.clientY};
+    goal.th-=dx*.006; goal.ph=Math.min(1.62,Math.max(.05,goal.ph-dy*.006)); rig.th=goal.th; rig.ph=goal.ph;
+    document.querySelectorAll('#views button').forEach(b=>b.classList.remove('on')); });
+  cv.addEventListener('pointerup',()=>drag=null);
+  cv.addEventListener('wheel',e=>{ e.preventDefault(); goal.r=Math.min(200,Math.max(2.5,goal.r*(e.deltaY>0?1.12:.89))); },{passive:false});
+
+  TW.resize=function(){ const w=host.clientWidth, h=host.clientHeight; if(!w||!h) return; renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
+    mat.uniforms.uScale.value=(h*Math.min(devicePixelRatio,2)/2)/Math.tan(THREE.MathUtils.degToRad(camera.fov/2)); };
+  addEventListener('resize',TW.resize);
+
+  const lbl=$('#lbl3d'), tmp=new THREE.Vector3(); let t0=performance.now();
+  function project(p){ tmp.copy(p).project(camera); return {x:(tmp.x+1)/2*host.clientWidth, y:(1-tmp.y)/2*host.clientHeight, vis:tmp.z<1 && Math.abs(tmp.x)<1.1 && Math.abs(tmp.y)<1.1}; }
+  function loop(now){
+    requestAnimationFrame(loop);
+    if(!TW.visible) return;
+    const dt=Math.min(.05,(now-t0)/1000); t0=now;
+    mat.uniforms.uT.value=now/1000;
+    if(auto) goal.th+=dt*.45;
+    const k=1-Math.pow(.02,dt*1.6);
+    rig.tgt.lerp(goal.tgt,k); rig.th+=(goal.th-rig.th)*k; rig.ph+=(goal.ph-rig.ph)*k; rig.r+=(goal.r-rig.r)*k;
+    camera.position.set(rig.tgt.x+rig.r*Math.sin(rig.ph)*Math.sin(rig.th), rig.tgt.y+rig.r*Math.cos(rig.ph), rig.tgt.z+rig.r*Math.sin(rig.ph)*Math.cos(rig.th));
+    camera.lookAt(rig.tgt);
+    const it=ITEMS[cur], fp=TW.pos[it.key];
+    ring.position.copy(fp); ring.quaternion.copy(camera.quaternion);
+    const dist=camera.position.distanceTo(fp); const s=Math.max(1,dist/10)*(1+.12*Math.sin(now/220));
+    ring.scale.setScalar(s);
+    const L=labels[it.id]; ring.material.color.set(L&&L.verdict==='damage'?{P1:0xef4444,P2:0xf97316,P3:0xeab308,P4:0x60a5fa}[L.prio]:L?0x8b9ab3:0xf5a524);
+    renderer.render(scene,camera);
+    const pr=project(fp); lbl.style.display=pr.vis?'':'none'; lbl.style.left=pr.x+'px'; lbl.style.top=(pr.y-s*3)+'px';
+    $('#lblT').textContent=it.id+' · '+it.title; $('#lblS').textContent=it.loc;
+    ITEMS.forEach((o,j)=>{ if(j===cur){o._pin.style.display='none';return;} const q=project(TW.pos[o.key]); o._pin.style.display=q.vis?'':'none'; o._pin.style.left=q.x+'px'; o._pin.style.top=q.y+'px'; });
+  }
+  TW.ready=true; TW.resize(); requestAnimationFrame(loop);
+})();
+
+/* boot */
+load(0); renderPList();
+</script>
+</body>
+</html>
